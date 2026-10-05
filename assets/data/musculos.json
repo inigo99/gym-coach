@@ -1,0 +1,19 @@
+[
+  { "id": "pecho", "nombre": "Pecho" },
+  { "id": "hombros", "nombre": "Hombros" },
+  { "id": "biceps", "nombre": "Bíceps" },
+  { "id": "triceps", "nombre": "Tríceps" },
+  { "id": "antebrazos", "nombre": "Antebrazos" },
+  { "id": "dorsales", "nombre": "Dorsales" },
+  { "id": "espalda_media", "nombre": "Espalda media" },
+  { "id": "trapecio", "nombre": "Trapecio" },
+  { "id": "lumbar", "nombre": "Lumbar" },
+  { "id": "abdomen", "nombre": "Abdomen" },
+  { "id": "gluteos", "nombre": "Glúteos" },
+  { "id": "cuadriceps", "nombre": "Cuádriceps" },
+  { "id": "isquios", "nombre": "Isquiotibiales" },
+  { "id": "gemelos", "nombre": "Gemelos" },
+  { "id": "aductores", "nombre": "Aductores" },
+  { "id": "abductores", "nombre": "Abductores" },
+  { "id": "cuello", "nombre": "Cuello" }
+]
