@@ -1,4 +1,5 @@
 import { asc } from 'drizzle-orm';
+import { router } from 'expo-router';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
@@ -39,12 +40,12 @@ export default function Ejercicios() {
         keyExtractor={(e) => e.id}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 8 }}
         renderItem={({ item }) => (
-          <View style={{ backgroundColor: C.tarjeta, borderRadius: 10, padding: 14, gap: 4 }}>
+          <Pressable onPress={() => router.push({ pathname: '/ejercicio/[id]', params: { id: item.id } })} accessibilityRole="button" style={{ backgroundColor: C.tarjeta, borderRadius: 10, padding: 14, gap: 4 }}>
             <Text style={{ color: C.texto, fontSize: 16, fontWeight: '600' }}>{item.nombre}</Text>
             <Text style={{ color: C.tenue, fontSize: 13 }}>
               {item.musculosPrincipales.map((m) => NOMBRE[m]).join(', ')} · {item.equipo.replace('_', ' ')}
             </Text>
-          </View>
+          </Pressable>
         )}
       />
     </View>

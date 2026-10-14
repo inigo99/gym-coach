@@ -50,3 +50,21 @@ export function BotonIcono(props: { texto: string; etiqueta: string; onPress: ()
 }
 
 export const num = (s: string) => (s.trim() === '' ? null : Number(s.replace(',', '.')));
+
+/** Selector de una opción en forma de pastillas. */
+export function Chips<T extends string>(props: { opciones: readonly { id: T; nombre: string }[]; valor: T; onChange: (id: T) => void }) {
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      {props.opciones.map((o) => (
+        <Pressable
+          key={o.id}
+          onPress={() => props.onChange(o.id)}
+          accessibilityRole="radio"
+          accessibilityState={{ checked: props.valor === o.id }}
+          style={{ minHeight: 44, paddingHorizontal: 14, justifyContent: 'center', borderRadius: 22, backgroundColor: props.valor === o.id ? C.acento : C.tarjeta }}>
+          <Text style={{ color: props.valor === o.id ? C.fondo : C.texto, fontWeight: '600' }}>{o.nombre}</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}

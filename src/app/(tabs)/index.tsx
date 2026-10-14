@@ -12,15 +12,15 @@ import { db } from '@/db';
 import { ejercicio, horario, medicion, rutina, rutinaEjercicio, serie, sesion, sesionEjercicio } from '@/db/schema';
 import { anadirEjercicio, borrarSesion, empezarSesion, terminarSesion } from '@/db/sesion';
 import { diaDe, textoHora } from '@/domain/horario';
+import { pesoEnFecha } from '@/domain/progreso';
 import { reloj, resumen, textoSerie } from '@/domain/sesion';
 
 export default function Entrenar() {
   const { data: abiertas } = useLiveQuery(db.select().from(sesion).where(isNull(sesion.fin)).limit(1));
-  const { data: pesos } = useLiveQuery(db.select({ peso: medicion.pesoKg }).from(medicion).orderBy(desc(medicion.fecha), desc(medicion.id)).limit(1));
-  const pesoCorporal = pesos[0]?.peso ?? null;
+  const { data: mediciones } = useLiveQuery(db.select({ fecha: medicion.fecha, pesoKg: medicion.pesoKg }).from(medicion));
   const abierta = abiertas[0];
 
-  return abierta ? <SesionEnCurso key={abierta.id} id={abierta.id} inicio={abierta.inicio} rutinaId={abierta.rutinaId} pesoCorporal={pesoCorporal} /> : <Historial pesoCorporal={pesoCorporal} />;
+  return abierta ? <SesionEnCurso key={abierta.id} id={abierta.id} inicio={abierta.inicio} rutinaId={abierta.rutinaId} pesoCorporal={pesoEnFecha(mediciones, abierta.inicio)} /> : <Historial mediciones={mediciones} />;
 }
 
 function SesionEnCurso({ id, inicio, rutinaId, pesoCorporal }: { id: number; inicio: string; rutinaId: number | null; pesoCorporal: number | null }) {
@@ -82,7 +82,7 @@ function SesionEnCurso({ id, inicio, rutinaId, pesoCorporal }: { id: number; ini
   );
 }
 
-function Historial({ pesoCorporal }: { pesoCorporal: number | null }) {
+function Historial({ mediciones }: { mediciones: { fecha: string; pesoKg: number }[] }) {
   // ponytail: últimas 30 sesiones; paginar si hace falta ver más atrás (la gráfica de S4 cubre el histórico)
   const { data: sesiones } = useLiveQuery(db.select().from(sesion).where(isNotNull(sesion.fin)).orderBy(desc(sesion.inicio)).limit(30));
   const ids = sesiones.map((s) => s.id);
@@ -112,7 +112,7 @@ function Historial({ pesoCorporal }: { pesoCorporal: number | null }) {
         {!sesiones.length && <Text style={{ color: C.tenue }}>Aún no hay sesiones.</Text>}
         {sesiones.map((ses) => {
           const suyas = series.filter((x) => x.s.sesionId === ses.id);
-          const r = resumen(suyas.map((x) => ({ ...x.s, registro: x.registro })), pesoCorporal);
+          const r = resumen(suyas.map((x) => ({ ...x.s, registro: x.registro })), pesoEnFecha(mediciones, ses.inicio));
           const porEjercicio = agrupar(suyas, (x) => x.nombre);
           const fecha = new Date(ses.inicio);
           return (

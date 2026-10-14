@@ -7,6 +7,7 @@ export default function TabsLayout() {
     <Tabs screenOptions={{ tabBarActiveTintColor: C.acento, tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 14 } }}>
       <Tabs.Screen name="index" options={{ title: 'Entrenar' }} />
       <Tabs.Screen name="rutinas" options={{ title: 'Rutinas' }} />
+      <Tabs.Screen name="progreso" options={{ title: 'Progreso' }} />
       <Tabs.Screen name="ejercicios" options={{ title: 'Ejercicios' }} />
       <Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
     </Tabs>

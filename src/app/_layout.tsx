@@ -43,6 +43,7 @@ export default function Layout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="rutina/[id]" options={{ title: 'Rutina', headerBackTitle: 'Rutinas' }} />
+        <Stack.Screen name="ejercicio/[id]" options={{ title: 'Ejercicio', headerBackTitle: 'Atrás' }} />
       </Stack>
     </ThemeProvider>
   );

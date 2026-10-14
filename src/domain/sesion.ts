@@ -34,7 +34,7 @@ export function textoSerie(s: SerieReg): string {
   }
 }
 
-/** Series de trabajo y volumen (kg) de una sesión. En peso corporal suma el peso del usuario. */
+/** Series de trabajo y volumen (kg) de una sesión. En peso corporal suma el peso del usuario ese día. */
 export function resumen(series: SerieReg[], pesoCorporalKg: number | null) {
   let volumenKg = 0;
   let trabajo = 0;
@@ -42,7 +42,6 @@ export function resumen(series: SerieReg[], pesoCorporalKg: number | null) {
     if (s.calentamiento) continue;
     trabajo++;
     if ((s.registro === 'carga' || s.registro === 'peso_corporal') && s.reps) {
-      // ponytail: peso corporal = última medición, no la de la fecha de la sesión; guardar en la serie si se necesita exacto
       volumenKg += cargaSerie(s.registro, s.pesoKg ?? 0, pesoCorporalKg ?? 0) * s.reps;
     }
   }
