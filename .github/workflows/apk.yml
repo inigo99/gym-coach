@@ -1,8 +1,8 @@
 name: APK
-# Al subir una etiqueta v* (p. ej. v1.0.0) compila el APK de Android y lo publica en Releases.
+# Al publicar una Release (p. ej. v1.0.0) compila el APK de Android y lo adjunta a esa Release.
 on:
-  push:
-    tags: ['v*']
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -39,10 +39,7 @@ jobs:
       - run: ./gradlew assembleRelease --no-daemon $FIRMA
         working-directory: android
       - run: cp android/app/build/outputs/apk/release/app-release.apk "gym-coach-${GITHUB_REF_NAME}.apk"
-      - name: Publicar en Releases
+      - name: Adjuntar a la Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "$GITHUB_REF_NAME" "gym-coach-${GITHUB_REF_NAME}.apk" --title "gym-coach $GITHUB_REF_NAME" \
-            --notes "APK de Android. Descárgalo en el móvil e instálalo (hay que permitir apps de origen desconocido). Para iPhone: Expo Go (ver README)." \
-            || gh release upload "$GITHUB_REF_NAME" "gym-coach-${GITHUB_REF_NAME}.apk" --clobber
+        run: gh release upload "$GITHUB_REF_NAME" "gym-coach-${GITHUB_REF_NAME}.apk" --clobber -R "$GITHUB_REPOSITORY"

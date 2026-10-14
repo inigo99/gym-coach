@@ -49,10 +49,10 @@ npx eas-cli@latest update --branch main    # publica la versión actual
 
 Después se abre en Expo Go desde la sesión de Expo, sin el PC encendido.
 
-**Android (APK):** se descarga de [Releases](https://github.com/inigo99/gym-coach/releases/latest). Se genera con GitHub Actions al subir una etiqueta:
+**Android (APK):** se descarga de [Releases](https://github.com/inigo99/gym-coach/releases/latest). Se genera con GitHub Actions al publicar una Release (con su etiqueta, p. ej. `v1.0.1`) y se adjunta a ella:
 
 ```bash
-git tag v1.0.1 && git push origin v1.0.1
+gh release create v1.0.1 --target master --title "gym-coach v1.0.1" --notes "Cambios…"
 ```
 
 Para firmar siempre con la misma clave (y poder instalar actualizaciones encima sin borrar la app), añade en el repo los secretos `ANDROID_KEYSTORE_B64` (keystore PKCS12 en base64, alias `gymcoach`) y `ANDROID_KEYSTORE_PASSWORD`. Sin ellos se firma con la clave de depuración.
