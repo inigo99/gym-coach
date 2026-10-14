@@ -2,7 +2,7 @@
 
 App móvil (Android e iOS) para registrar el entrenamiento en el gimnasio: perfil y mediciones, series de fuerza y cardio, rutinas con horario y avisos, gráficas de progreso, fichas de técnica con mapa muscular y nivel por grupo muscular. Funciona sin conexión: los datos se guardan en el móvil (SQLite).
 
-> Estado: S4. Perfil y mediciones, catálogo de 36 ejercicios, registro de sesiones (fuerza y cardio, descanso con aviso, valores de la última vez, historial), rutinas con horario y avisos, y progreso: gráfica por ejercicio, récords y evolución del peso corporal.
+> Estado: S5. Registro de sesiones (fuerza y cardio, descanso con aviso, historial), rutinas con horario y avisos, progreso con gráficas y récords, fichas de técnica de 36 ejercicios con mapa muscular y nivel por ejercicio y por grupo muscular.
 
 ## Stack
 
@@ -27,11 +27,11 @@ npx expo start          # escanear el QR con la app Expo Go (iPhone) o abrir el 
 ## Estructura
 
 ```
-src/app/        pantallas (expo-router): (tabs)/ Entrenar, Rutinas, Progreso, Ejercicios, Perfil; rutina/[id] editor; ejercicio/[id] progreso
+src/app/        pantallas (expo-router): (tabs)/ Entrenar, Rutinas, Progreso, Cuerpo, Perfil; rutina/[id] editor; ejercicio/[id] ficha (técnica, músculos, nivel, progreso)
 src/notificaciones.ts  avisos del horario (semanales) y del fin del descanso
 src/db/         esquema Drizzle, cliente, semilla del catálogo y funciones de sesión
 src/components/ piezas de UI (tarjeta de ejercicio, cronómetros, selector)
-src/domain/     cálculos puros con tests (1RM, volumen, edad, IMC, sesión, horario, progreso)
+src/domain/     cálculos puros con tests (1RM, volumen, sesión, horario, progreso, niveles)
 assets/data/    catálogo de ejercicios y grupos musculares
 drizzle/        migraciones generadas
 ```
@@ -43,7 +43,9 @@ drizzle/        migraciones generadas
 
 ## Datos de ejercicios
 
-Los músculos y las referencias a fotos salen de [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (declarado *Unlicense*). La procedencia de sus fotos no está documentada, así que de momento solo se usan en local; los nombres y textos en español son propios.
+- **Músculos y fotos:** [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (declarado *Unlicense*). La procedencia de sus fotos no está documentada, así que no se incluyen en el repo: la app las carga desde ese repositorio solo para uso personal.
+- **Técnica** (`assets/data/tecnica.json`): textos propios en español.
+- **Niveles** (`assets/data/niveles.json`): umbrales de 1RM relativo al peso corporal (o repeticiones en ejercicios con peso corporal) por sexo de [Strength Level](https://strengthlevel.com/strength-standards), consultados el 14-10-2026. Principiante ≈ más fuerte que el 5 % de sus usuarios, novato 20 %, intermedio 50 %, avanzado 80 % y élite 95 %. Es una comparación con gente que entrena y registra sus marcas, no con toda la población.
 
 ## Aviso
 

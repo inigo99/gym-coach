@@ -91,7 +91,7 @@ export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number
       ))}
 
       <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-        <Campo flex etiqueta={forma.a} valor={valA} onChange={(a) => setCampos((c) => ({ ...c, a }))} numerico />
+        <Campo flex etiqueta={ej.equipo === 'mancuerna' && forma.a === 'kg' ? 'kg (cada una)' : forma.a} valor={valA} onChange={(a) => setCampos((c) => ({ ...c, a }))} numerico />
         {forma.b && <Campo flex etiqueta={forma.b} valor={valB} onChange={(b) => setCampos((c) => ({ ...c, b }))} numerico />}
         <Pressable
           onPress={() => setCalentamiento((x) => !x)}
