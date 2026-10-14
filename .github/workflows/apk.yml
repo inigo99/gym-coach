@@ -1,8 +1,10 @@
 name: APK
-# Al publicar una Release (p. ej. v1.0.0) compila el APK de Android y lo adjunta a esa Release.
+# Cuando cambia la versión de app.json en master (o a mano), compila el APK y crea la Release v{versión}.
 on:
-  release:
-    types: [published]
+  push:
+    branches: [master]
+    paths: [app.json, .github/workflows/apk.yml]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,20 +14,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Versión
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="v$(node -p "require('./app.json').expo.version")"
+          echo "VERSION=$V" >> "$GITHUB_ENV"
+          if gh release view "$V" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then echo "EXISTE=1" >> "$GITHUB_ENV"; echo "La Release $V ya existe: no se compila."; fi
       - uses: actions/setup-node@v4
+        if: env.EXISTE != '1'
         with:
           node-version: 22
           cache: npm
       - uses: actions/setup-java@v4
+        if: env.EXISTE != '1'
         with:
           distribution: temurin
           java-version: 17
       - run: npm ci
+        if: env.EXISTE != '1'
       - run: npm test
+        if: env.EXISTE != '1'
+      - run: node -e "const f='app.json',a=require('./'+f);a.expo.android.versionCode=+process.env.GITHUB_RUN_NUMBER;require('fs').writeFileSync(f,JSON.stringify(a,null,2))"
+        if: env.EXISTE != '1'
       - run: npx expo prebuild -p android --no-install
+        if: env.EXISTE != '1'
       # Con los secretos ANDROID_KEYSTORE_B64 y ANDROID_KEYSTORE_PASSWORD se firma siempre con la misma clave
       # (las actualizaciones se instalan encima). Sin ellos, con la clave de depuración de cada ejecución.
       - name: Firma
+        if: env.EXISTE != '1'
         env:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
           KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -37,9 +54,14 @@ jobs:
             echo "::warning::Sin clave propia: APK firmado con la clave de depuración"
           fi
       - run: ./gradlew assembleRelease --no-daemon $FIRMA
+        if: env.EXISTE != '1'
         working-directory: android
-      - run: cp android/app/build/outputs/apk/release/app-release.apk "gym-coach-${GITHUB_REF_NAME}.apk"
-      - name: Adjuntar a la Release
+      - run: cp android/app/build/outputs/apk/release/app-release.apk "gym-coach-${VERSION}.apk"
+        if: env.EXISTE != '1'
+      - name: Crear la Release
+        if: env.EXISTE != '1'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$GITHUB_REF_NAME" "gym-coach-${GITHUB_REF_NAME}.apk" --clobber -R "$GITHUB_REPOSITORY"
+        run: |
+          gh release create "$VERSION" "gym-coach-${VERSION}.apk" -R "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "gym-coach $VERSION" \
+            --notes "APK de Android: descárgalo en el móvil e instálalo (hay que permitir apps de origen desconocido). En iPhone, con Expo Go (ver README). Información orientativa; no sustituye a un entrenador ni a un profesional sanitario."
