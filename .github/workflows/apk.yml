@@ -1,0 +1,48 @@
+name: APK
+# Al subir una etiqueta v* (p. ej. v1.0.0) compila el APK de Android y lo publica en Releases.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npm test
+      - run: npx expo prebuild -p android --no-install
+      # Con los secretos ANDROID_KEYSTORE_B64 y ANDROID_KEYSTORE_PASSWORD se firma siempre con la misma clave
+      # (las actualizaciones se instalan encima). Sin ellos, con la clave de depuración de cada ejecución.
+      - name: Firma
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/clave.p12"
+            echo "FIRMA=-Pandroid.injected.signing.store.file=$RUNNER_TEMP/clave.p12 -Pandroid.injected.signing.store.password=$KS_PASS -Pandroid.injected.signing.key.alias=gymcoach -Pandroid.injected.signing.key.password=$KS_PASS" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Sin clave propia: APK firmado con la clave de depuración"
+          fi
+      - run: ./gradlew assembleRelease --no-daemon $FIRMA
+        working-directory: android
+      - run: cp android/app/build/outputs/apk/release/app-release.apk "gym-coach-${GITHUB_REF_NAME}.apk"
+      - name: Publicar en Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "gym-coach-${GITHUB_REF_NAME}.apk" --title "gym-coach $GITHUB_REF_NAME" \
+            --notes "APK de Android. Descárgalo en el móvil e instálalo (hay que permitir apps de origen desconocido). Para iPhone: Expo Go (ver README)." \
+            || gh release upload "$GITHUB_REF_NAME" "gym-coach-${GITHUB_REF_NAME}.apk" --clobber
