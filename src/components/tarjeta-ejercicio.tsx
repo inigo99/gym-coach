@@ -3,9 +3,10 @@ import { Alert, Pressable, Text, View } from 'react-native';
 
 import { Boton, BotonIcono, Campo, num } from '@/components/ui';
 import { C } from '@/constants/theme';
-import type { Ejercicio, Serie } from '@/db/schema';
+import type { Ejercicio, RutinaEjercicio, Serie } from '@/db/schema';
 import { anadirSerie, borrarSerie, quitarEjercicio, seriesUltimaVez } from '@/db/sesion';
-import { textoSerie } from '@/domain/sesion';
+import { textoObjetivo } from '@/domain/horario';
+import { reloj, textoSerie } from '@/domain/sesion';
 
 type Campos = { a: string | null; b: string | null }; // null = usar el valor propuesto
 
@@ -36,8 +37,8 @@ const FORMA = {
   },
 } as const;
 
-export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number; series: Serie[]; onSerie: () => void }) {
-  const { ejercicio: ej, sesionId, series } = props;
+export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number; objetivo?: RutinaEjercicio; series: Serie[]; onSerie: (descansoS: number) => void }) {
+  const { ejercicio: ej, sesionId, series, objetivo } = props;
   const forma = FORMA[ej.registro];
   const ultimaVez = useMemo(() => seriesUltimaVez(ej.id, sesionId), [ej.id, sesionId]);
   const [campos, setCampos] = useState<Campos>({ a: null, b: null });
@@ -45,7 +46,7 @@ export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number
 
   // Propuesta: la misma serie de la última vez o, si no hay, la última de hoy.
   const base = ultimaVez[series.length] ?? series.at(-1) ?? ultimaVez.at(-1);
-  const [propA, propB] = base ? forma.leer(base) : ['', ''];
+  const [propA, propB] = base ? forma.leer(base) : ['', objetivo?.repsMin ? String(objetivo.repsMin) : '']; // sin historial: reps mínimas del objetivo
   const valA = campos.a ?? propA;
   const valB = campos.b ?? propB;
   const nueva = forma.serie(num(valA), num(valB));
@@ -55,7 +56,7 @@ export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number
     anadirSerie({ sesionId, ejercicioId: ej.id, calentamiento, ...nueva });
     setCampos({ a: null, b: null });
     setCalentamiento(false);
-    if (!calentamiento) props.onSerie();
+    if (!calentamiento) props.onSerie(objetivo?.descansoS ?? 90);
   };
 
   const quitar = () =>
@@ -74,6 +75,11 @@ export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number
         <Text style={{ flex: 1, color: C.texto, fontSize: 17, fontWeight: '700' }}>{ej.nombre}</Text>
         <BotonIcono texto="×" etiqueta={`Quitar ${ej.nombre}`} onPress={quitar} />
       </View>
+      {objetivo && (
+        <Text style={{ color: C.acento, fontSize: 13, fontWeight: '600' }}>
+          Objetivo: {textoObjetivo(objetivo)} · descanso {reloj(objetivo.descansoS)}
+        </Text>
+      )}
       {ultimaVez.length > 0 && <Text style={{ color: C.tenue, fontSize: 13 }}>Última vez: {ultimaVez.map(txt).join(', ')}</Text>}
 
       {series.map((s, i) => (

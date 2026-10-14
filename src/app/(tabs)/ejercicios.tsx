@@ -3,7 +3,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 
-import musculos from '../../assets/data/musculos.json';
+import musculos from '@/assets/data/musculos.json';
 import { C } from '@/constants/theme';
 import { db } from '@/db';
 import { ejercicio } from '@/db/schema';

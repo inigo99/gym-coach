@@ -2,11 +2,11 @@
 
 App móvil (Android e iOS) para registrar el entrenamiento en el gimnasio: perfil y mediciones, series de fuerza y cardio, rutinas con horario y avisos, gráficas de progreso, fichas de técnica con mapa muscular y nivel por grupo muscular. Funciona sin conexión: los datos se guardan en el móvil (SQLite).
 
-> Estado: S2. Perfil y mediciones, catálogo de 36 ejercicios y registro de sesiones (series de fuerza y cardio, descanso, valores de la última vez, historial).
+> Estado: S3. Perfil y mediciones, catálogo de 36 ejercicios, registro de sesiones (series de fuerza y cardio, descanso con aviso, valores de la última vez, historial), rutinas con objetivo por ejercicio y horario semanal con avisos.
 
 ## Stack
 
-Expo (React Native) + TypeScript · expo-router · expo-sqlite + Drizzle ORM · Jest. Solo librerías incluidas en **Expo Go**.
+Expo (React Native) + TypeScript · expo-router · expo-sqlite + Drizzle ORM · expo-notifications (locales) · Jest. Solo librerías incluidas en **Expo Go**.
 
 ## Arrancar
 
@@ -27,7 +27,8 @@ npx expo start          # escanear el QR con la app Expo Go (iPhone) o abrir el 
 ## Estructura
 
 ```
-src/app/        pantallas (expo-router)
+src/app/        pantallas (expo-router): (tabs)/ Entrenar, Rutinas, Ejercicios, Perfil; rutina/[id] editor
+src/notificaciones.ts  avisos del horario (semanales) y del fin del descanso
 src/db/         esquema Drizzle, cliente, semilla del catálogo y funciones de sesión
 src/components/ piezas de UI (tarjeta de ejercicio, cronómetros, selector)
 src/domain/     cálculos puros con tests (1RM, volumen, edad, IMC, resumen de sesión)

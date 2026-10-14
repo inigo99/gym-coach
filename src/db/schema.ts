@@ -33,10 +33,38 @@ export type Perfil = typeof perfil.$inferSelect;
 export type Medicion = typeof medicion.$inferSelect;
 export type Ejercicio = typeof ejercicio.$inferSelect;
 
+export const rutina = sqliteTable('rutina', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  nombre: text('nombre').notNull(),
+});
+
+export const rutinaEjercicio = sqliteTable(
+  'rutina_ejercicio',
+  {
+    rutinaId: integer('rutina_id').notNull().references(() => rutina.id, { onDelete: 'cascade' }),
+    ejercicioId: text('ejercicio_id').notNull().references(() => ejercicio.id),
+    orden: integer('orden').notNull(),
+    series: integer('series').notNull().default(3),
+    repsMin: integer('reps_min'), // en tiempo/cardio: null
+    repsMax: integer('reps_max'),
+    descansoS: integer('descanso_s').notNull().default(90),
+  },
+  (t) => [primaryKey({ columns: [t.rutinaId, t.ejercicioId] })],
+);
+
+/** Una rutina como mucho por día de la semana (1 = lunes … 7 = domingo). */
+export const horario = sqliteTable('horario', {
+  dia: integer('dia').primaryKey(),
+  rutinaId: integer('rutina_id').notNull().references(() => rutina.id, { onDelete: 'cascade' }),
+  hora: integer('hora').notNull(),
+  minuto: integer('minuto').notNull(),
+});
+
 export const sesion = sqliteTable('sesion', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   inicio: text('inicio').notNull(), // ISO
   fin: text('fin'), // null = en curso
+  rutinaId: integer('rutina_id').references(() => rutina.id, { onDelete: 'set null' }),
 });
 
 /** Ejercicios de la sesión, en orden (también los que aún no tienen series). */
@@ -67,3 +95,6 @@ export const serie = sqliteTable(
 
 export type Sesion = typeof sesion.$inferSelect;
 export type Serie = typeof serie.$inferSelect;
+export type Rutina = typeof rutina.$inferSelect;
+export type RutinaEjercicio = typeof rutinaEjercicio.$inferSelect;
+export type Horario = typeof horario.$inferSelect;

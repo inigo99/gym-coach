@@ -9,8 +9,9 @@ import { ElegirEjercicio } from '@/components/elegir-ejercicio';
 import { TarjetaEjercicio } from '@/components/tarjeta-ejercicio';
 import { C } from '@/constants/theme';
 import { db } from '@/db';
-import { ejercicio, medicion, serie, sesion, sesionEjercicio } from '@/db/schema';
+import { ejercicio, horario, medicion, rutina, rutinaEjercicio, serie, sesion, sesionEjercicio } from '@/db/schema';
 import { anadirEjercicio, borrarSesion, empezarSesion, terminarSesion } from '@/db/sesion';
+import { diaDe, textoHora } from '@/domain/horario';
 import { reloj, resumen, textoSerie } from '@/domain/sesion';
 
 export default function Entrenar() {
@@ -19,16 +20,18 @@ export default function Entrenar() {
   const pesoCorporal = pesos[0]?.peso ?? null;
   const abierta = abiertas[0];
 
-  return abierta ? <SesionEnCurso key={abierta.id} id={abierta.id} inicio={abierta.inicio} pesoCorporal={pesoCorporal} /> : <Historial pesoCorporal={pesoCorporal} />;
+  return abierta ? <SesionEnCurso key={abierta.id} id={abierta.id} inicio={abierta.inicio} rutinaId={abierta.rutinaId} pesoCorporal={pesoCorporal} /> : <Historial pesoCorporal={pesoCorporal} />;
 }
 
-function SesionEnCurso({ id, inicio, pesoCorporal }: { id: number; inicio: string; pesoCorporal: number | null }) {
+function SesionEnCurso({ id, inicio, rutinaId, pesoCorporal }: { id: number; inicio: string; rutinaId: number | null; pesoCorporal: number | null }) {
   const { data: ejercicios } = useLiveQuery(
     db.select({ ej: ejercicio }).from(sesionEjercicio).innerJoin(ejercicio, eq(ejercicio.id, sesionEjercicio.ejercicioId)).where(eq(sesionEjercicio.sesionId, id)).orderBy(asc(sesionEjercicio.orden)),
   );
   const { data: series } = useLiveQuery(db.select().from(serie).where(eq(serie.sesionId, id)).orderBy(asc(serie.id)));
+  const { data: objetivos } = useLiveQuery(db.select().from(rutinaEjercicio).where(eq(rutinaEjercicio.rutinaId, rutinaId ?? -1)), [rutinaId]);
+  const { data: rutinas } = useLiveQuery(db.select({ nombre: rutina.nombre }).from(rutina).where(eq(rutina.id, rutinaId ?? -1)), [rutinaId]);
   const [eligiendo, setEligiendo] = useState(false);
-  const [descansoDesde, setDescansoDesde] = useState<number | null>(null);
+  const [descanso, setDescanso] = useState<{ desde: number; segundos: number } | null>(null);
 
   const terminar = () => {
     const registro = Object.fromEntries(ejercicios.map(({ ej }) => [ej.id, ej.registro]));
@@ -42,16 +45,26 @@ function SesionEnCurso({ id, inicio, pesoCorporal }: { id: number; inicio: strin
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderColor: C.borde }}>
-        <Cronometro desde={Date.parse(inicio)} />
+        <View>
+          <Cronometro desde={Date.parse(inicio)} />
+          {rutinas[0] && <Text style={{ color: C.tenue, fontSize: 13 }}>{rutinas[0].nombre}</Text>}
+        </View>
         <Pressable onPress={terminar} accessibilityRole="button" style={{ minHeight: 44, paddingHorizontal: 16, justifyContent: 'center', borderRadius: 10, backgroundColor: C.tarjeta }}>
           <Text style={{ color: C.acento, fontWeight: '700' }}>Terminar</Text>
         </Pressable>
       </View>
-      {descansoDesde && <Descanso key={descansoDesde} desde={descansoDesde} onCerrar={() => setDescansoDesde(null)} />}
+      {descanso && <Descanso key={descanso.desde} desde={descanso.desde} segundos={descanso.segundos} onCerrar={() => setDescanso(null)} />}
 
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         {ejercicios.map(({ ej }) => (
-          <TarjetaEjercicio key={ej.id} ejercicio={ej} sesionId={id} series={series.filter((s) => s.ejercicioId === ej.id)} onSerie={() => setDescansoDesde(Date.now())} />
+          <TarjetaEjercicio
+            key={ej.id}
+            ejercicio={ej}
+            sesionId={id}
+            objetivo={objetivos.find((o) => o.ejercicioId === ej.id)}
+            series={series.filter((s) => s.ejercicioId === ej.id)}
+            onSerie={(segundos) => setDescanso({ desde: Date.now(), segundos })}
+          />
         ))}
         <Boton texto="Añadir ejercicio" activo={!ejercicios.length} onPress={() => setEligiendo(true)} />
       </ScrollView>
@@ -77,13 +90,22 @@ function Historial({ pesoCorporal }: { pesoCorporal: number | null }) {
     db.select({ s: serie, nombre: ejercicio.nombre, registro: ejercicio.registro }).from(serie).innerJoin(ejercicio, eq(ejercicio.id, serie.ejercicioId)).where(inArray(serie.sesionId, ids)).orderBy(asc(serie.id)),
     [ids.join()],
   );
+  const { data: rutinas } = useLiveQuery(db.select().from(rutina).orderBy(asc(rutina.nombre)));
+  const { data: hoy } = useLiveQuery(db.select({ id: rutina.id, nombre: rutina.nombre, hora: horario.hora, minuto: horario.minuto }).from(horario).innerJoin(rutina, eq(rutina.id, horario.rutinaId)).where(eq(horario.dia, diaDe(new Date()))));
   const [abierta, setAbierta] = useState<number | null>(null);
+  const toca = hoy[0];
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 24 }}>
       <View style={{ gap: 8 }}>
-        <Boton texto="Empezar sesión" activo onPress={() => empezarSesion()} />
-        {sesiones[0] && <Boton texto="Repetir la última sesión" onPress={() => empezarSesion(sesiones[0].id)} />}
+        {toca && <Boton texto={`Hoy toca: ${toca.nombre} (${textoHora(toca.hora, toca.minuto)})`} activo onPress={() => empezarSesion({ rutina: toca.id })} />}
+        {rutinas
+          .filter((r) => r.id !== toca?.id)
+          .map((r) => (
+            <Boton key={r.id} texto={`Empezar ${r.nombre}`} onPress={() => empezarSesion({ rutina: r.id })} />
+          ))}
+        <Boton texto="Sesión libre" activo={!toca && !rutinas.length} onPress={() => empezarSesion()} />
+        {sesiones[0] && <Boton texto="Repetir la última sesión" onPress={() => empezarSesion({ sesion: sesiones[0].id })} />}
       </View>
 
       <Seccion titulo="Historial">
@@ -112,7 +134,7 @@ function Historial({ pesoCorporal }: { pesoCorporal: number | null }) {
                     </Text>
                   ))}
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Pressable onPress={() => empezarSesion(ses.id)} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center' }}>
+                    <Pressable onPress={() => empezarSesion({ sesion: ses.id })} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center' }}>
                       <Text style={{ color: C.acento, fontWeight: '600' }}>Repetir esta sesión</Text>
                     </Pressable>
                     <BotonIcono

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-require-imports -- jest.mock necesita require dentro de la fábrica */
+/* eslint-disable @typescript-eslint/no-require-imports -- jest.mock necesita require */
 // Prueba las migraciones y las funciones de sesión sobre SQLite real (better-sqlite3 en Node).
 import { eq } from 'drizzle-orm';
 
@@ -6,16 +6,7 @@ import { serie, sesion, sesionEjercicio } from './schema';
 import { sembrarCatalogo } from './semilla';
 import { anadirEjercicio, anadirSerie, empezarSesion, quitarEjercicio, seriesUltimaVez, terminarSesion } from './sesion';
 
-jest.mock('./index', () => {
-  const Database = require('better-sqlite3');
-  const { drizzle } = require('drizzle-orm/better-sqlite3');
-  const { migrate } = require('drizzle-orm/better-sqlite3/migrator');
-  const cliente = new Database(':memory:');
-  cliente.pragma('foreign_keys = ON');
-  const db = drizzle(cliente, { schema: require('./schema') });
-  migrate(db, { migrationsFolder: 'drizzle' });
-  return { db };
-});
+jest.mock('./index', () => require('./bd-prueba'));
 const { db } = jest.requireMock('./index');
 
 beforeAll(() => sembrarCatalogo());
@@ -33,7 +24,7 @@ test('sesión completa: ejercicios, series, última vez, repetir y terminar', ()
   anadirSerie({ sesionId: s1, ejercicioId: CURL, pesoKg: 25, reps: 10 });
   terminarSesion(s1);
 
-  const s2 = empezarSesion(s1);
+  const s2 = empezarSesion({ sesion: s1 });
   const orden = db.select().from(sesionEjercicio).where(eq(sesionEjercicio.sesionId, s2)).all();
   expect(orden.map((e: { ejercicioId: string; orden: number }) => [e.ejercicioId, e.orden])).toEqual([[PRESS, 0], [CURL, 1]]);
   expect(seriesUltimaVez(PRESS, s2).map((x) => x.pesoKg)).toEqual([20, 60]);

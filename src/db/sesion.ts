@@ -1,16 +1,20 @@
 import { and, asc, desc, eq, max, ne } from 'drizzle-orm';
 
 import { db } from '.';
-import { serie, sesion, sesionEjercicio } from './schema';
+import { rutinaEjercicio, serie, sesion, sesionEjercicio } from './schema';
 
-/** Empieza una sesión; con `copiarDe`, con los mismos ejercicios y en el mismo orden. */
-export function empezarSesion(copiarDe?: number) {
+/** Empieza una sesión libre, una copia de otra (mismos ejercicios y orden) o la de una rutina. */
+export function empezarSesion(desde?: { sesion: number } | { rutina: number }) {
   return db.transaction((tx) => {
-    const { id } = tx.insert(sesion).values({ inicio: new Date().toISOString() }).returning({ id: sesion.id }).get();
-    if (copiarDe) {
-      const ejercicios = tx.select().from(sesionEjercicio).where(eq(sesionEjercicio.sesionId, copiarDe)).all();
-      if (ejercicios.length) tx.insert(sesionEjercicio).values(ejercicios.map((e) => ({ ...e, sesionId: id }))).run();
-    }
+    const rutinaId =
+      desde && 'sesion' in desde ? (tx.select({ r: sesion.rutinaId }).from(sesion).where(eq(sesion.id, desde.sesion)).get()?.r ?? null) : (desde?.rutina ?? null);
+    const { id } = tx.insert(sesion).values({ inicio: new Date().toISOString(), rutinaId }).returning({ id: sesion.id }).get();
+    const ejercicios = !desde
+      ? []
+      : 'sesion' in desde
+        ? tx.select({ ejercicioId: sesionEjercicio.ejercicioId, orden: sesionEjercicio.orden }).from(sesionEjercicio).where(eq(sesionEjercicio.sesionId, desde.sesion)).all()
+        : tx.select({ ejercicioId: rutinaEjercicio.ejercicioId, orden: rutinaEjercicio.orden }).from(rutinaEjercicio).where(eq(rutinaEjercicio.rutinaId, desde.rutina)).all();
+    if (ejercicios.length) tx.insert(sesionEjercicio).values(ejercicios.map((e) => ({ ...e, sesionId: id }))).run();
     return id;
   });
 }

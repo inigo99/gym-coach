@@ -4,6 +4,7 @@ import { Text, Vibration, View } from 'react-native';
 import { BotonIcono } from '@/components/ui';
 import { C } from '@/constants/theme';
 import { reloj } from '@/domain/sesion';
+import { avisarDescanso } from '@/notificaciones';
 
 function useAhora() {
   const [ahora, setAhora] = useState(() => Date.now());
@@ -23,15 +24,20 @@ export function Cronometro({ desde }: { desde: number }) {
   );
 }
 
-// ponytail: solo dentro de la app; el aviso con la app en segundo plano llega en S3 (expo-notifications)
-export function Descanso({ desde, onCerrar }: { desde: number; onCerrar: () => void }) {
+/** Cuenta atrás del descanso: vibra con la app abierta y avisa con una notificación si está en segundo plano. */
+export function Descanso({ desde, segundos, onCerrar }: { desde: number; segundos: number; onCerrar: () => void }) {
   const ahora = useAhora();
-  const [duracion, setDuracion] = useState(90);
+  const [duracion, setDuracion] = useState(segundos);
   const quedan = duracion - (ahora - desde) / 1000;
 
   useEffect(() => {
-    const t = setTimeout(() => Vibration.vibrate(), desde + duracion * 1000 - Date.now());
-    return () => clearTimeout(t);
+    const restante = desde + duracion * 1000 - Date.now();
+    const t = setTimeout(() => Vibration.vibrate(), restante);
+    const cancelarAviso = avisarDescanso(restante / 1000);
+    return () => {
+      clearTimeout(t);
+      cancelarAviso();
+    };
   }, [desde, duracion]);
 
   const fin = quedan <= 0;
