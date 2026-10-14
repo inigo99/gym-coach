@@ -1,14 +1,15 @@
 import { desc } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+
+import { Boton, BotonIcono, Campo, num, Seccion } from '@/components/ui';
 
 import { C } from '@/constants/theme';
 import { borrarMedicion, db, guardarPerfil } from '@/db';
 import { medicion, perfil, type Medicion as MedicionT, type Perfil as PerfilT } from '@/db/schema';
 import { edad, imc } from '@/domain/calculos';
 
-const num = (s: string) => (s.trim() === '' ? null : Number(s.replace(',', '.')));
 const fechaValida = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s));
 const hoy = () => new Date().toISOString().slice(0, 10);
 
@@ -87,47 +88,9 @@ function Mediciones({ mediciones }: { mediciones: MedicionT[] }) {
           <Text style={{ color: C.texto, flex: 1 }}>
             {m.fecha} · {m.pesoKg} kg{m.grasaPct != null ? ` · ${m.grasaPct} %` : ''}
           </Text>
-          <Pressable onPress={() => borrarMedicion(m.id)} accessibilityLabel={`Borrar medición del ${m.fecha}`} style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ color: C.tenue, fontSize: 18 }}>×</Text>
-          </Pressable>
+          <BotonIcono texto="×" etiqueta={`Borrar medición del ${m.fecha}`} onPress={() => borrarMedicion(m.id)} />
         </View>
       ))}
     </Seccion>
-  );
-}
-
-function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  return (
-    <View style={{ gap: 12 }}>
-      <Text style={{ color: C.tenue, fontSize: 13, fontWeight: '600', letterSpacing: 1.5, textTransform: 'uppercase' }}>{titulo}</Text>
-      {children}
-    </View>
-  );
-}
-
-function Campo(props: { etiqueta: string; valor: string; onChange: (s: string) => void; numerico?: boolean; error?: boolean }) {
-  return (
-    <View style={{ gap: 6 }}>
-      <Text style={{ color: props.error ? C.acento : C.tenue, fontSize: 13 }}>{props.etiqueta}</Text>
-      <TextInput
-        value={props.valor}
-        onChangeText={props.onChange}
-        accessibilityLabel={props.etiqueta}
-        keyboardType={props.numerico ? 'decimal-pad' : 'default'}
-        style={{ minHeight: 44, backgroundColor: C.tarjeta, color: C.texto, borderRadius: 10, paddingHorizontal: 12, fontSize: 16, borderWidth: 1, borderColor: props.error ? C.acento : C.borde }}
-      />
-    </View>
-  );
-}
-
-function Boton(props: { texto: string; activo: boolean; onPress: () => void; deshabilitado?: boolean }) {
-  return (
-    <Pressable
-      onPress={props.onPress}
-      disabled={props.deshabilitado}
-      accessibilityRole="button"
-      style={{ minHeight: 44, flexGrow: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16, opacity: props.deshabilitado ? 0.4 : 1, backgroundColor: props.activo ? C.acento : C.tarjeta }}>
-      <Text style={{ color: props.activo ? C.fondo : C.texto, fontWeight: '700' }}>{props.texto}</Text>
-    </Pressable>
   );
 }

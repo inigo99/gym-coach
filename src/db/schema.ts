@@ -1,4 +1,4 @@
-import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 import type { Registro } from '@/domain/calculos';
 
@@ -32,3 +32,38 @@ export const ejercicio = sqliteTable('ejercicio', {
 export type Perfil = typeof perfil.$inferSelect;
 export type Medicion = typeof medicion.$inferSelect;
 export type Ejercicio = typeof ejercicio.$inferSelect;
+
+export const sesion = sqliteTable('sesion', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  inicio: text('inicio').notNull(), // ISO
+  fin: text('fin'), // null = en curso
+});
+
+/** Ejercicios de la sesión, en orden (también los que aún no tienen series). */
+export const sesionEjercicio = sqliteTable(
+  'sesion_ejercicio',
+  {
+    sesionId: integer('sesion_id').notNull().references(() => sesion.id, { onDelete: 'cascade' }),
+    ejercicioId: text('ejercicio_id').notNull().references(() => ejercicio.id),
+    orden: integer('orden').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.sesionId, t.ejercicioId] })],
+);
+
+export const serie = sqliteTable(
+  'serie',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    sesionId: integer('sesion_id').notNull().references(() => sesion.id, { onDelete: 'cascade' }),
+    ejercicioId: text('ejercicio_id').notNull().references(() => ejercicio.id),
+    pesoKg: real('peso_kg'), // carga, o lastre en peso_corporal
+    reps: integer('reps'),
+    duracionS: integer('duracion_s'),
+    distanciaM: real('distancia_m'),
+    calentamiento: integer('calentamiento', { mode: 'boolean' }).notNull().default(false),
+  },
+  (t) => [index('serie_ejercicio_idx').on(t.ejercicioId, t.sesionId)],
+);
+
+export type Sesion = typeof sesion.$inferSelect;
+export type Serie = typeof serie.$inferSelect;

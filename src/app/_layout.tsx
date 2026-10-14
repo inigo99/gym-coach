@@ -5,7 +5,8 @@ import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 
 import { C } from '@/constants/theme';
-import { db, sembrarCatalogo } from '@/db';
+import { db } from '@/db';
+import { sembrarCatalogo } from '@/db/semilla';
 import migrations from '../../drizzle/migrations';
 
 SplashScreen.preventAutoHideAsync();
@@ -34,7 +35,8 @@ export default function Layout() {
   return (
     <ThemeProvider value={tema}>
       <Tabs screenOptions={{ tabBarActiveTintColor: C.acento, tabBarIcon: () => null, tabBarLabelStyle: { fontSize: 14 } }}>
-        <Tabs.Screen name="index" options={{ title: 'Ejercicios' }} />
+        <Tabs.Screen name="index" options={{ title: 'Entrenar' }} />
+        <Tabs.Screen name="ejercicios" options={{ title: 'Ejercicios' }} />
         <Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
       </Tabs>
     </ThemeProvider>

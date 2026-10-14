@@ -2,7 +2,7 @@
 
 App móvil (Android e iOS) para registrar el entrenamiento en el gimnasio: perfil y mediciones, series de fuerza y cardio, rutinas con horario y avisos, gráficas de progreso, fichas de técnica con mapa muscular y nivel por grupo muscular. Funciona sin conexión: los datos se guardan en el móvil (SQLite).
 
-> Estado: S1 (base y datos). Perfil, mediciones y catálogo de 36 ejercicios.
+> Estado: S2. Perfil y mediciones, catálogo de 36 ejercicios y registro de sesiones (series de fuerza y cardio, descanso, valores de la última vez, historial).
 
 ## Stack
 
@@ -19,7 +19,7 @@ npx expo start          # escanear el QR con la app Expo Go (iPhone) o abrir el 
 
 | Comando | Qué hace |
 |---|---|
-| `npm test` | Tests (dominio y catálogo) |
+| `npm test` | Tests: dominio, catálogo y base de datos (migraciones reales sobre better-sqlite3) |
 | `npm run lint` / `npm run typecheck` | Calidad |
 | `npm run db:generate -- --name <nombre>` | Nueva migración tras cambiar `src/db/schema.ts` |
 | `npm run catalogo` | Regenera `assets/data/ejercicios.json` desde free-exercise-db |
@@ -28,8 +28,9 @@ npx expo start          # escanear el QR con la app Expo Go (iPhone) o abrir el 
 
 ```
 src/app/        pantallas (expo-router)
-src/db/         esquema Drizzle, cliente y semilla del catálogo
-src/domain/     cálculos puros con tests (1RM, volumen, edad, IMC)
+src/db/         esquema Drizzle, cliente, semilla del catálogo y funciones de sesión
+src/components/ piezas de UI (tarjeta de ejercicio, cronómetros, selector)
+src/domain/     cálculos puros con tests (1RM, volumen, edad, IMC, resumen de sesión)
 assets/data/    catálogo de ejercicios y grupos musculares
 drizzle/        migraciones generadas
 ```
