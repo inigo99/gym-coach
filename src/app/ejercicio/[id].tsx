@@ -3,9 +3,10 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import { useState } from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
+import { Image, Linking, ScrollView, Text, View } from 'react-native';
 
 import musculos from '@/assets/data/musculos.json';
+import imagenes from '@/assets/data/imagenes.json';
 import tecnica from '@/assets/data/tecnica.json';
 import { Cuerpo } from '@/components/cuerpo';
 import { Grafica } from '@/components/grafica';
@@ -19,12 +20,13 @@ import { enRango, formatoMetrica, METRICAS, RANGOS, record, serieTemporal, type 
 import { textoSerie } from '@/domain/sesion';
 import { ESTANDARES, useNiveles } from '@/hooks/use-niveles';
 
-type Ficha = { ajustes?: string[]; ejecucion: string[]; errores: string[]; fotos?: 'invertidas' | 'vistas' };
+type Ficha = { ajustes?: string[]; ejecucion: string[]; errores: string[] };
+type Imagen = { url: string; licencia: string; licencia_url: string; autor: string | null; ia: boolean };
 const FICHAS = tecnica as Record<string, Ficha>;
 const NOMBRE = Object.fromEntries(musculos.map((m) => [m.id, m.nombre]));
 const SECUNDARIO = '#7A3A2C';
-// ponytail: fotos cargadas desde free-exercise-db (solo uso personal; sin conexión no se ven). Antes de publicar: wger o solo el mapa.
-const FOTOS = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+// Imágenes de wger.de con su licencia; se cargan de la red (sin conexión, solo el mapa muscular).
+const IMAGENES = imagenes.ejercicios as Record<string, { imagenes: Imagen[] }>;
 const EQUIPO: Record<string, string> = { barra: 'Barra', barra_z: 'Barra Z', mancuerna: 'Mancuernas', maquina: 'Máquina', polea: 'Polea', peso_corporal: 'Peso corporal', cardio: 'Cardio' };
 
 export default function FichaEjercicio() {
@@ -64,7 +66,7 @@ export default function FichaEjercicio() {
         {EQUIPO[ej.equipo] ?? ej.equipo} · {ej.registro === 'cardio' ? 'Cardio' : 'Fuerza'}
       </Text>
 
-      {ej.imagenesOrigen?.length === 2 && <Movimiento imagenes={ej.imagenesOrigen} modo={ficha?.fotos} />}
+      {IMAGENES[ej.id] && <Movimiento imagenes={IMAGENES[ej.id].imagenes} />}
 
       <Seccion titulo="Músculos trabajados">
         <Cuerpo colores={colores} descripcion={`Principales: ${ej.musculosPrincipales.map((x) => NOMBRE[x]).join(', ')}`} />
@@ -141,21 +143,21 @@ export default function FichaEjercicio() {
   );
 }
 
-function Movimiento({ imagenes, modo }: { imagenes: string[]; modo?: Ficha['fotos'] }) {
-  const [a, b] = modo === 'invertidas' ? [imagenes[1], imagenes[0]] : imagenes;
-  const etiquetas = modo === 'vistas' ? [null, null] : (['INICIO', 'FINAL'] as const);
+function Movimiento({ imagenes }: { imagenes: Imagen[] }) {
   const [fallo, setFallo] = useState(false);
   if (fallo) return null; // sin conexión: la ficha sigue con el mapa muscular
   return (
     <Seccion titulo="Movimiento">
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        {[a, b].map((img, i) => (
-          <View key={img} style={{ flex: 1, gap: 6 }}>
-            <Image source={{ uri: FOTOS + img }} onError={() => setFallo(true)} accessibilityLabel={etiquetas[i] ? `Posición ${etiquetas[i]!.toLowerCase()}` : 'Foto del ejercicio'} style={{ width: '100%', aspectRatio: 1.5, borderRadius: 10, backgroundColor: C.tarjeta }} />
-            {etiquetas[i] && <Text style={{ color: i ? C.acento : '#7FCB8A', fontSize: 13, fontWeight: '700', letterSpacing: 1.5 }}>{etiquetas[i]}</Text>}
-          </View>
+        {imagenes.map((img) => (
+          <Image key={img.url} source={{ uri: img.url }} onError={() => setFallo(true)} accessibilityLabel="Ilustración del ejercicio" resizeMode="contain" style={{ flex: 1, aspectRatio: 1, borderRadius: 10, backgroundColor: '#FFFFFF' }} />
         ))}
       </View>
+      {[...new Map(imagenes.map((i) => [`${i.autor}|${i.licencia}`, i])).values()].map((i) => (
+        <Text key={i.url} onPress={() => Linking.openURL(i.licencia_url)} accessibilityRole="link" style={{ color: C.tenue, fontSize: 12 }}>
+          {i.ia ? 'Imagen generada con IA' : `Imagen: ${i.autor ?? 'autor sin indicar'}`} · {i.licencia.replace('CC-BY-SA', 'CC BY-SA')} · wger.de
+        </Text>
+      ))}
     </Seccion>
   );
 }

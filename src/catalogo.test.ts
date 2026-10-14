@@ -1,6 +1,7 @@
 import ejercicios from '../assets/data/ejercicios.json';
 import musculos from '../assets/data/musculos.json';
 import niveles from '../assets/data/niveles.json';
+import imagenes from '../assets/data/imagenes.json';
 import tecnica from '../assets/data/tecnica.json';
 
 const ids = new Set(musculos.map((m) => m.id));
@@ -25,12 +26,11 @@ test('equipo y registro conocidos', () => {
 });
 
 test('técnica: una ficha por ejercicio con ejecución y errores', () => {
-  const t = tecnica as Record<string, { ajustes?: string[]; ejecucion: string[]; errores: string[]; fotos?: string }>;
+  const t = tecnica as Record<string, { ajustes?: string[]; ejecucion: string[]; errores: string[] }>;
   expect(Object.keys(t).sort()).toEqual(ejercicios.map((e) => e.id).sort());
   for (const f of Object.values(t)) {
     expect(f.ejecucion.length).toBeGreaterThanOrEqual(2);
     expect(f.errores.length).toBeGreaterThanOrEqual(1);
-    if (f.fotos) expect(['invertidas', 'vistas']).toContain(f.fotos);
   }
 });
 
@@ -39,5 +39,18 @@ test('niveles: todos los de fuerza menos la plancha; tipo reps solo en peso corp
   for (const e of ejercicios) {
     if (e.registro === 'carga' || e.registro === 'peso_corporal') expect(n[e.id]?.tipo).toBe(e.registro === 'carga' ? 'ratio' : 'reps');
     else expect(n[e.id]).toBeUndefined();
+  }
+});
+
+test('imágenes: solo de wger, con licencia y de ejercicios del catálogo', () => {
+  const ids = new Set(ejercicios.map((e) => e.id));
+  for (const [id, v] of Object.entries(imagenes.ejercicios)) {
+    expect(ids).toContain(id);
+    expect(v.imagenes.length).toBeGreaterThan(0);
+    for (const i of v.imagenes) {
+      expect(i.url.startsWith('https://wger.de/media/')).toBe(true);
+      expect(i.licencia).toMatch(/^CC/);
+      expect(i.licencia_url).toMatch(/^https:\/\/creativecommons\.org\//);
+    }
   }
 });

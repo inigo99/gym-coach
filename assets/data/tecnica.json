@@ -62,8 +62,7 @@
       "Doblar y estirar los codos: se convierte en un press.",
       "Dejar caer el peso en la vuelta o golpear las placas.",
       "Abrir más de lo cómodo: carga el hombro, no el pecho."
-    ],
-    "fotos": "invertidas"
+    ]
   },
   "cat:pushups": {
     "ejecucion": [
@@ -88,8 +87,7 @@
       "Bajar más de lo que permiten los hombros.",
       "Encoger los hombros hacia las orejas.",
       "Balancear las piernas para subir."
-    ],
-    "fotos": "invertidas"
+    ]
   },
   "cat:pullups": {
     "ejecucion": [
@@ -274,8 +272,7 @@
       "Redondear la espalda.",
       "Doblar mucho las rodillas: se convierte en un peso muerto.",
       "Alejar la barra de las piernas."
-    ],
-    "fotos": "invertidas"
+    ]
   },
   "cat:dumbbell_lunges": {
     "ejecucion": [
@@ -443,8 +440,7 @@
       "Agarrarse a la barandilla.",
       "Pasos demasiado largos.",
       "Correr pegado al frontal de la cinta."
-    ],
-    "fotos": "vistas"
+    ]
   },
   "cat:bicycling_stationary": {
     "ajustes": [
@@ -459,8 +455,7 @@
     "errores": [
       "Sillín demasiado bajo: carga las rodillas.",
       "Balancear la cadera sobre el sillín."
-    ],
-    "fotos": "vistas"
+    ]
   },
   "cat:rowing_stationary": {
     "ajustes": [
@@ -475,8 +470,7 @@
       "Tirar con los brazos antes de empujar con las piernas.",
       "Redondear la espalda.",
       "Doblar las rodillas antes de que el mango pase sobre ellas en la vuelta."
-    ],
-    "fotos": "vistas"
+    ]
   },
   "cat:elliptical_trainer": {
     "ejecucion": [
@@ -487,8 +481,7 @@
     "errores": [
       "Apoyar todo el peso en los brazos.",
       "Ir de puntillas."
-    ],
-    "fotos": "vistas"
+    ]
   },
   "cat:stairmaster": {
     "ejecucion": [
@@ -499,7 +492,6 @@
     "errores": [
       "Colgarse de las barandillas.",
       "Inclinarse mucho hacia delante."
-    ],
-    "fotos": "vistas"
+    ]
   }
 }
