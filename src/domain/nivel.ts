@@ -90,7 +90,8 @@ export function puntuaciones(
   for (const s of series) {
     const pc = pesoEn(s.inicio);
     if (s.calentamiento || !pc || !estandares[s.ejercicioId]) continue;
-    porEj.set(s.ejercicioId, [...(porEj.get(s.ejercicioId) ?? []), { pesoKg: s.pesoKg, reps: s.reps, pesoCorporalKg: pc }]);
+    const lista = porEj.get(s.ejercicioId) ?? porEj.set(s.ejercicioId, []).get(s.ejercicioId)!;
+    lista.push({ pesoKg: s.pesoKg, reps: s.reps, pesoCorporalKg: pc });
   }
   const out = new Map<string, { marca: number; puntuacion: number }>();
   for (const [id, ss] of porEj) {

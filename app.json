@@ -8,7 +8,6 @@
     "scheme": "gymcoach",
     "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.inigo99.gymcoach"
     },
     "android": {
@@ -32,10 +31,11 @@
         {
           "backgroundColor": "#16181B",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 160
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,

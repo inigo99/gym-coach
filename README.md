@@ -2,7 +2,7 @@
 
 App móvil (Android e iOS) para registrar el entrenamiento en el gimnasio: perfil y mediciones, series de fuerza y cardio, rutinas con horario y avisos, gráficas de progreso, fichas de técnica con mapa muscular y nivel por grupo muscular. Funciona sin conexión: los datos se guardan en el móvil (SQLite).
 
-> Estado: S5. Registro de sesiones (fuerza y cardio, descanso con aviso, historial), rutinas con horario y avisos, progreso con gráficas y récords, fichas de técnica de 36 ejercicios con mapa muscular y nivel por ejercicio y por grupo muscular.
+> Estado: v1 (S6). Registro de sesiones de fuerza y cardio con descanso y avisos, rutinas con horario semanal, progreso con gráficas y récords, fichas de técnica de 36 ejercicios con mapa muscular, nivel por ejercicio y grupo muscular, y copia de seguridad.
 
 ## Stack
 
@@ -29,6 +29,7 @@ npx expo start          # escanear el QR con la app Expo Go (iPhone) o abrir el 
 ```
 src/app/        pantallas (expo-router): (tabs)/ Entrenar, Rutinas, Progreso, Cuerpo, Perfil; rutina/[id] editor; ejercicio/[id] ficha (técnica, músculos, nivel, progreso)
 src/notificaciones.ts  avisos del horario (semanales) y del fin del descanso
+src/hooks/      useNiveles (nivel por ejercicio de las últimas 8 semanas)
 src/db/         esquema Drizzle, cliente, semilla del catálogo y funciones de sesión
 src/components/ piezas de UI (tarjeta de ejercicio, cronómetros, selector)
 src/domain/     cálculos puros con tests (1RM, volumen, sesión, horario, progreso, niveles)
@@ -38,8 +39,27 @@ drizzle/        migraciones generadas
 
 ## Distribución
 
-- **iPhone:** Expo Go (desarrollo) y EAS Update.
-- **Android:** APK con `npx eas-cli@latest build -p android --profile preview`.
+**iPhone (Expo Go, gratis):**
+
+```bash
+npx eas-cli@latest login
+npx eas-cli@latest init                    # una vez: crea el proyecto en Expo y añade su id a app.json
+npx eas-cli@latest update --branch main    # publica la versión actual
+```
+
+Después se abre en Expo Go desde la sesión de Expo, sin el PC encendido.
+
+**Android (APK):**
+
+```bash
+npx eas-cli@latest build -p android --profile preview
+```
+
+EAS compila en la nube y da un enlace al `.apk` para instalarlo o subirlo a GitHub Releases.
+
+## Copia de seguridad
+
+Los datos solo están en el móvil. En **Perfil → Copia de seguridad** se exporta un JSON (para guardarlo en Archivos, Drive o correo) y se importa en otro móvil. La importación sustituye todos los datos y es de todo o nada: si la copia trae algo inválido, no se cambia nada.
 
 ## Datos de ejercicios
 

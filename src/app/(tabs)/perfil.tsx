@@ -3,6 +3,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
+import { CopiaSeguridad } from '@/components/copia-seguridad';
 import { Boton, BotonIcono, Campo, num, Seccion } from '@/components/ui';
 
 import { C } from '@/constants/theme';
@@ -23,6 +24,7 @@ export default function Perfil() {
       {/* key: el formulario se monta de nuevo cuando llega el perfil guardado */}
       <Datos key={p ? 'guardado' : 'nuevo'} p={p} pesoActual={mediciones[0]?.pesoKg} />
       <Mediciones mediciones={mediciones} />
+      <CopiaSeguridad />
     </ScrollView>
   );
 }

@@ -42,7 +42,7 @@ export function pesoEnFecha(mediciones: { fecha: string; pesoKg: number }[], fec
 /** Un valor de la métrica por sesión (sin calentamientos), ordenado por fecha. */
 export function serieTemporal(registro: Registro, metrica: Metrica, series: SerieFecha[], mediciones: { fecha: string; pesoKg: number }[] = []) {
   const porSesion = new Map<number, SerieFecha[]>();
-  for (const s of series) if (!s.calentamiento) porSesion.set(s.sesionId, [...(porSesion.get(s.sesionId) ?? []), s]);
+  for (const s of series) if (!s.calentamiento) (porSesion.get(s.sesionId) ?? porSesion.set(s.sesionId, []).get(s.sesionId)!).push(s);
 
   const puntos: { fecha: string; valor: number }[] = [];
   for (const ss of porSesion.values()) {
