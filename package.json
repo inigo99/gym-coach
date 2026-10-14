@@ -49,8 +49,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "db:generate": "drizzle-kit generate",
-    "catalogo": "node scripts/catalogo.mjs"
+    "db:generate": "drizzle-kit generate"
   },
   "private": true,
   "jest": {

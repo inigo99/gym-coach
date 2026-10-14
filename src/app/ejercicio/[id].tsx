@@ -1,15 +1,15 @@
 import { and, asc, desc, eq, isNotNull } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import { useState } from 'react';
-import { Image, Linking, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 
 import musculos from '@/assets/data/musculos.json';
-import imagenes from '@/assets/data/imagenes.json';
-import tecnica from '@/assets/data/tecnica.json';
+import { EJERCICIO, EQUIPOS } from '@/catalogo';
 import { Cuerpo } from '@/components/cuerpo';
 import { Grafica } from '@/components/grafica';
+import { Ilustracion } from '@/components/ilustracion';
 import { BarraNivel } from '@/components/nivel';
 import { Chips, Seccion } from '@/components/ui';
 import { C } from '@/constants/theme';
@@ -20,14 +20,9 @@ import { enRango, formatoMetrica, METRICAS, RANGOS, record, serieTemporal, type 
 import { textoSerie } from '@/domain/sesion';
 import { ESTANDARES, useNiveles } from '@/hooks/use-niveles';
 
-type Ficha = { ajustes?: string[]; ejecucion: string[]; errores: string[] };
-type Imagen = { url: string; licencia: string; licencia_url: string; autor: string | null; ia: boolean };
-const FICHAS = tecnica as Record<string, Ficha>;
 const NOMBRE = Object.fromEntries(musculos.map((m) => [m.id, m.nombre]));
 const SECUNDARIO = '#7A3A2C';
-// Imágenes de wger.de con su licencia; se cargan de la red (sin conexión, solo el mapa muscular).
-const IMAGENES = imagenes.ejercicios as Record<string, { imagenes: Imagen[] }>;
-const EQUIPO: Record<string, string> = { barra: 'Barra', barra_z: 'Barra Z', mancuerna: 'Mancuernas', maquina: 'Máquina', polea: 'Polea', peso_corporal: 'Peso corporal', cardio: 'Cardio' };
+const EQUIPO = Object.fromEntries(EQUIPOS.map((e) => [e.id, e.nombre]));
 
 export default function FichaEjercicio() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,13 +39,16 @@ export default function FichaEjercicio() {
   );
   const { data: mediciones } = useLiveQuery(db.select({ fecha: medicion.fecha, pesoKg: medicion.pesoKg }).from(medicion).orderBy(desc(medicion.fecha)));
   const niveles = useNiveles();
+  const { width } = useWindowDimensions();
   const ej = ejs[0];
+  const cat = EJERCICIO.get(id);
   const metricas = ej ? METRICAS[ej.registro] : [];
   const [metrica, setMetrica] = useState<Metrica | null>(null);
   const [rango, setRango] = useState<(typeof RANGOS)[number]['id']>('3m');
   if (!ej) return null;
 
-  const ficha = FICHAS[ej.id];
+  const ficha = cat?.tecnica;
+  const familia = cat?.familia;
   const m = metricas.find((x) => x.id === metrica) ?? metricas[0];
   const series = filas.map((f) => ({ ...f.s, inicio: f.inicio }));
   const puntos = serieTemporal(ej.registro, m.id, series, mediciones);
@@ -61,12 +59,41 @@ export default function FichaEjercicio() {
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 28, paddingBottom: 48 }}>
-      <Stack.Screen options={{ title: ej.nombre }} />
-      <Text style={{ color: C.tenue }}>
-        {EQUIPO[ej.equipo] ?? ej.equipo} · {ej.registro === 'cardio' ? 'Cardio' : 'Fuerza'}
-      </Text>
+      <Stack.Screen options={{ title: familia?.nombre ?? ej.nombre }} />
+      <View style={{ gap: 4 }}>
+        {familia && <Text style={{ color: C.tenue }}>{familia.en}</Text>}
+        <Text style={{ color: C.tenue }}>{cat ? cat.equipo.map((x) => EQUIPO[x]).join(' · ') : ej.equipo}</Text>
+      </View>
 
-      {IMAGENES[ej.id] && <Movimiento imagenes={IMAGENES[ej.id].imagenes} />}
+      {familia && familia.variantes.length > 1 && (
+        <Seccion titulo={`Variantes (${familia.variantes.length})`}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {familia.variantes.map((v) => {
+              const activa = v.id === id;
+              return (
+                <Pressable
+                  key={v.id}
+                  onPress={() => router.setParams({ id: v.id })}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: activa }}
+                  style={{ minHeight: 40, paddingHorizontal: 12, justifyContent: 'center', borderRadius: 20, backgroundColor: activa ? C.acento : C.tarjeta }}>
+                  <Text style={{ color: activa ? C.fondo : C.texto, fontWeight: '600' }}>{v.nombre}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Seccion>
+      )}
+
+      {cat && (
+        <Seccion titulo={familia && familia.variantes.length > 1 ? cat.nombre : 'Movimiento'}>
+          <Text style={{ color: C.tenue, fontSize: 13 }}>{cat.en}</Text>
+          <View style={{ backgroundColor: C.tarjeta, borderRadius: 12, paddingVertical: 4 }}>
+            <Ilustracion ejercicio={cat} ancho={width - 32} />
+          </View>
+          {cat.nota && <Text style={{ color: C.texto, lineHeight: 21 }}>{cat.nota}</Text>}
+        </Seccion>
+      )}
 
       <Seccion titulo="Músculos trabajados">
         <Cuerpo colores={colores} descripcion={`Principales: ${ej.musculosPrincipales.map((x) => NOMBRE[x]).join(', ')}`} />
@@ -140,25 +167,6 @@ export default function FichaEjercicio() {
 
       <Text style={{ color: C.tenue, fontSize: 12, lineHeight: 18 }}>Información orientativa. No sustituye a un entrenador ni a un profesional sanitario.</Text>
     </ScrollView>
-  );
-}
-
-function Movimiento({ imagenes }: { imagenes: Imagen[] }) {
-  const [fallo, setFallo] = useState(false);
-  if (fallo) return null; // sin conexión: la ficha sigue con el mapa muscular
-  return (
-    <Seccion titulo="Movimiento">
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        {imagenes.map((img) => (
-          <Image key={img.url} source={{ uri: img.url }} onError={() => setFallo(true)} accessibilityLabel="Ilustración del ejercicio" resizeMode="contain" style={{ flex: 1, aspectRatio: 1, borderRadius: 10, backgroundColor: '#FFFFFF' }} />
-        ))}
-      </View>
-      {[...new Map(imagenes.map((i) => [`${i.autor}|${i.licencia}`, i])).values()].map((i) => (
-        <Text key={i.url} onPress={() => Linking.openURL(i.licencia_url)} accessibilityRole="link" style={{ color: C.tenue, fontSize: 12 }}>
-          {i.ia ? 'Imagen generada con IA' : `Imagen: ${i.autor ?? 'autor sin indicar'}`} · {i.licencia.replace('CC-BY-SA', 'CC BY-SA')} · wger.de
-        </Text>
-      ))}
-    </Seccion>
   );
 }
 

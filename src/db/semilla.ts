@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 
-import catalogo from '../../assets/data/ejercicios.json';
+import { EJERCICIOS } from '@/catalogo';
 import { db } from '.';
 import * as schema from './schema';
 
@@ -8,15 +8,15 @@ import * as schema from './schema';
 export function sembrarCatalogo() {
   db.insert(schema.ejercicio)
     .values(
-      catalogo.map((e) => ({
+      EJERCICIOS.map((e) => ({
         id: e.id,
-        nombre: e.nombre,
-        registro: e.registro as schema.Ejercicio['registro'],
-        equipo: e.equipo,
-        musculosPrincipales: e.musculos_principales,
-        musculosSecundarios: e.musculos_secundarios,
-        idOrigen: e.id_origen,
-        imagenesOrigen: e.imagenes_origen,
+        nombre: e.nombreCompleto,
+        registro: e.registro,
+        equipo: e.equipo[0],
+        musculosPrincipales: e.principales,
+        musculosSecundarios: e.secundarios,
+        idOrigen: null,
+        imagenesOrigen: null,
       })),
     )
     .onConflictDoUpdate({

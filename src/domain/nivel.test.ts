@@ -1,5 +1,5 @@
 import niveles from '../../assets/data/niveles.json';
-import ejercicios from '../../assets/data/ejercicios.json';
+import { EJERCICIOS as ejercicios } from '@/catalogo';
 import { marca, nivel, nivelPorGrupo, puntuacion, puntuaciones, seriesPorSemana } from './nivel';
 
 const BANCA = [0.5, 1.0, 1.25, 1.5, 2.0];

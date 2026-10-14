@@ -16,8 +16,8 @@ export default function TabsLayout() {
     <Tabs screenOptions={{ tabBarActiveTintColor: C.acento, tabBarInactiveTintColor: C.tenue }}>
       <Tabs.Screen name="index" options={{ title: 'Entrenar', tabBarIcon: icono('barbell') }} />
       <Tabs.Screen name="rutinas" options={{ title: 'Rutinas', tabBarIcon: icono('calendar') }} />
+      <Tabs.Screen name="ejercicios" options={{ title: 'Ejercicios', tabBarIcon: icono('search') }} />
       <Tabs.Screen name="progreso" options={{ title: 'Progreso', tabBarIcon: icono('stats-chart') }} />
-      <Tabs.Screen name="cuerpo" options={{ title: 'Cuerpo', tabBarIcon: icono('body') }} />
       <Tabs.Screen name="perfil" options={{ title: 'Perfil', tabBarIcon: icono('person') }} />
     </Tabs>
   );

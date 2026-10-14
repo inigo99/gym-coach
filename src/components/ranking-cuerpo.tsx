@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import musculos from '@/assets/data/musculos.json';
 import { colorEscala, Cuerpo, ESCALA, SIN_COLOR } from '@/components/cuerpo';
@@ -19,7 +19,8 @@ const VISTAS = [
 const SEMANAS_VOLUMEN = 4;
 const VOLUMEN_ALTO = 20; // series/semana que se pintan con el tono más intenso (rango orientativo 10–20)
 
-export default function CuerpoTab() {
+/** Mapa y ranking por grupo muscular (nivel o volumen). */
+export function RankingCuerpo() {
   const [vista, setVista] = useState<(typeof VISTAS)[number]['id']>('nivel');
   const [desde] = useState(() => Date.now() - SEMANAS_VOLUMEN * 7 * 86_400_000);
   const { data: ejercicios } = useLiveQuery(db.select().from(ejercicio));
@@ -38,7 +39,7 @@ export default function CuerpoTab() {
   const conDatos = lista.filter((m) => datos.has(m.id));
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: 40 }}>
+    <View style={{ gap: 24 }}>
       <Chips opciones={VISTAS} valor={vista} onChange={setVista} />
 
       {vista === 'nivel' && falta ? (
@@ -78,7 +79,7 @@ export default function CuerpoTab() {
           ? 'Nivel según tu mejor 1RM estimado (o repeticiones) frente a los estándares de Strength Level, por ejercicio y sexo; cada grupo pondera sus ejercicios (principal ×1, secundario ×0,5). Solo grupos con al menos un ejercicio principal registrado. La edad no ajusta el nivel.'
           : 'Series de trabajo: 1 por músculo principal y 0,5 por secundario. Como referencia orientativa, muchas pautas proponen 10–20 series semanales por grupo.'}
       </Text>
-    </ScrollView>
+    </View>
   );
 }
 

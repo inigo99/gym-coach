@@ -2,7 +2,7 @@
 
 App móvil (Android e iOS) para registrar el entrenamiento en el gimnasio: perfil y mediciones, series de fuerza y cardio, rutinas con horario y avisos, gráficas de progreso, fichas de técnica con mapa muscular y nivel por grupo muscular. Funciona sin conexión: los datos se guardan en el móvil (SQLite).
 
-> Estado: v1 (S6). Registro de sesiones de fuerza y cardio con descanso y avisos, rutinas con horario semanal, progreso con gráficas y récords, fichas de técnica de 36 ejercicios con mapa muscular, nivel por ejercicio y grupo muscular, y copia de seguridad.
+> Estado: v1.1 en desarrollo. Catálogo de 56 ejercicios con 179 variantes (nombres en español e inglés), buscador por qué hacen, qué entrenan y qué usan, e ilustraciones propias de inicio a final con los músculos resaltados.
 
 ## Stack
 
@@ -22,13 +22,14 @@ npx expo start          # escanear el QR con la app Expo Go (iPhone) o abrir el 
 | `npm test` | Tests: dominio, catálogo y base de datos (migraciones reales sobre better-sqlite3) |
 | `npm run lint` / `npm run typecheck` | Calidad |
 | `npm run db:generate -- --name <nombre>` | Nueva migración tras cambiar `src/db/schema.ts` |
-| `npm run catalogo` | Regenera `assets/data/ejercicios.json` desde free-exercise-db |
 
 ## Estructura
 
 ```
-src/app/        pantallas (expo-router): (tabs)/ Entrenar, Rutinas, Progreso, Cuerpo, Perfil; rutina/[id] editor; ejercicio/[id] ficha (técnica, músculos, nivel, progreso)
+src/app/        pantallas (expo-router): (tabs)/ Entrenar, Rutinas, Ejercicios (buscador), Progreso (con Cuerpo), Perfil; rutina/[id] editor; ejercicio/[id] ficha (técnica, músculos, nivel, progreso)
 src/notificaciones.ts  avisos del horario (semanales) y del fin del descanso
+src/catalogo/   familias de ejercicios con sus variantes, técnica y buscador
+src/ilustracion/ figura de perfil, material y poses de inicio y final de cada ejercicio
 src/hooks/      useNiveles (nivel por ejercicio de las últimas 8 semanas)
 src/db/         esquema Drizzle, cliente, semilla del catálogo y funciones de sesión
 src/components/ piezas de UI (tarjeta de ejercicio, cronómetros, selector)
@@ -59,9 +60,9 @@ Los datos solo están en el móvil. En **Perfil → Copia de seguridad** se expo
 
 ## Datos de ejercicios
 
-- **Músculos:** [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (*Unlicense*).
-- **Imágenes:** [wger](https://wger.de) (`assets/data/imagenes.json`), cada una con su licencia (CC BY-SA 3.0/4.0) y autor, que se muestran en la ficha. No están en el repo: la app las carga de wger.de y sin conexión la ficha muestra solo el mapa muscular. Hay imagen para 29 de los 36 ejercicios.
-- **Técnica** (`assets/data/tecnica.json`): textos propios en español.
+- **Catálogo** (`src/catalogo/datos.ts`): cada familia (por ejemplo, *Press de pecho*) agrupa sus variantes (barra, mancuernas, máquina, Smith, polea…), cada una con su forma de registrar, material, músculos y técnica. Nombres en español e inglés; los nombres de las máquinas Technogym son alias para el buscador. Los textos son propios.
+- **Ilustraciones** (`src/ilustracion/`): dibujos propios generados por código, con el mismo estilo que el mapa muscular. Muestran la posición inicial y la final, el material y los músculos que trabajan (principales en naranja, secundarios en granate). No hay imágenes de terceros.
+- **Músculos de los 36 ejercicios originales:** [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (*Unlicense*).
 - **Niveles** (`assets/data/niveles.json`): umbrales de 1RM relativo al peso corporal (o repeticiones en ejercicios con peso corporal) por sexo de [Strength Level](https://strengthlevel.com/strength-standards), consultados el 14-10-2026. Principiante ≈ más fuerte que el 5 % de sus usuarios, novato 20 %, intermedio 50 %, avanzado 80 % y élite 95 %. Es una comparación con gente que entrena y registra sus marcas, no con toda la población.
 
 ## Aviso
