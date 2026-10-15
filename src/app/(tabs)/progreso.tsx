@@ -1,5 +1,5 @@
 import { asc, desc, eq, isNotNull, max, sql } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { useLiveQuery } from '@/db/use-live-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text } from 'react-native';

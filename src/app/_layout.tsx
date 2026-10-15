@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { useLiveQuery } from '@/db/use-live-query';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { DarkTheme, ThemeProvider } from 'expo-router';
 import { Stack } from 'expo-router/stack';

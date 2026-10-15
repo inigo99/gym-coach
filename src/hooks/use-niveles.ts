@@ -1,5 +1,5 @@
 import { and, eq, gte, isNotNull } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { useLiveQuery } from '@/db/use-live-query';
 import { useState } from 'react';
 
 import niveles from '@/assets/data/niveles.json';

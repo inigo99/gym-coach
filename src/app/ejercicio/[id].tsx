@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, isNotNull } from 'drizzle-orm';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { useLiveQuery } from '@/db/use-live-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import { useState } from 'react';
