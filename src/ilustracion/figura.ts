@@ -31,6 +31,7 @@ export type Material =
   | { t: 'asiento'; respaldo?: boolean }
   | { t: 'almohadilla'; en: Articulacion; lado?: 1 | -1 }
   | { t: 'cajon'; x: number; alto: number; ancho?: number } // x relativa a la cadera
+  | { t: 'cajon'; bajo: Articulacion; ancho?: number } // justo debajo de esa articulación (manos apoyadas)
   | { t: 'cinta' | 'bici' | 'eliptica' | 'remo' | 'escaladora' | 'esterilla' };
 
 export type Forma =
@@ -41,10 +42,11 @@ export type Forma =
   | { t: 'rect'; x: number; y: number; w: number; h: number; c: string; rx?: number };
 
 export const COLORES = {
-  cuerpo: '#4A4F57',
-  lejos: '#33373D',
+  cuerpo: '#555B64',
+  lejos: '#3B4048', // extremidades del lado lejano: más oscuras pero opacas, para que no desaparezcan
   principal: '#F0603C',
-  secundario: '#8A4433',
+  secundario: '#B0563C',
+  fondo: '#202328', // = C.tarjeta: contorno que separa brazo y pierna cercanos del tronco
   material: '#8C919A',
   materialOscuro: '#5E636B',
   suelo: '#3A3E44',
@@ -98,7 +100,11 @@ type Colorear = (musculo: string) => string | null;
 
 function cuerpo(j: Js, color: Colorear, lejos: boolean): Forma[] {
   const base = lejos ? COLORES.lejos : COLORES.cuerpo;
-  const o = lejos ? 0.55 : 1;
+  const o = lejos ? 0.6 : 1; // solo los músculos del lado lejano, atenuados
+  // Contorno del color del fondo bajo el brazo y la pierna cercanos: se distinguen aunque pasen por delante del tronco.
+  const contorno = (a: Punto, b: Punto, r: number) => {
+    if (!lejos) f.push({ t: 'capsula', a, b, r: r + 1.3, c: COLORES.fondo });
+  };
   const f: Forma[] = [];
   const pinta = (m: string, p: Punto[]) => {
     const c = color(m);
@@ -108,6 +114,9 @@ function cuerpo(j: Js, color: Colorear, lejos: boolean): Forma[] {
   const pierna = lejos ? { r: j.rodilla2, t: j.tobillo2, p: j.punta2 } : { r: j.rodilla, t: j.tobillo, p: j.punta };
 
   // Pierna
+  contorno(j.cadera, pierna.r, R.muslo);
+  contorno(pierna.r, pierna.t, R.pierna);
+  contorno(pierna.t, pierna.p, R.pie);
   f.push({ t: 'capsula', a: j.cadera, b: pierna.r, r: R.muslo, c: base });
   f.push({ t: 'capsula', a: pierna.r, b: pierna.t, r: R.pierna, c: base });
   f.push({ t: 'capsula', a: pierna.t, b: pierna.p, r: R.pie, c: base });
@@ -136,6 +145,8 @@ function cuerpo(j: Js, color: Colorear, lejos: boolean): Forma[] {
     if (abd) f.push({ t: 'circulo', c0: j.cadera, r: 3, c: abd });
   }
   // Brazo
+  contorno(brazo.h, brazo.c, R.brazo);
+  contorno(brazo.c, brazo.m, R.antebrazo);
   f.push({ t: 'capsula', a: brazo.h, b: brazo.c, r: R.brazo, c: base });
   f.push({ t: 'capsula', a: brazo.c, b: brazo.m, r: R.antebrazo, c: base });
   pinta('biceps', mitad(brazo.h, brazo.c, R.brazo, 1, 0.2));
@@ -172,7 +183,7 @@ function material(m: Material, j: Js, suelo: number): Forma[] {
       return [{ t: 'linea', a: [en[0], en[1]], b: [en[0], suelo], c: D, w: 2.5 }, { t: 'circulo', c0: en, r: 2.6, c: M }];
     case 'smith':
       return [
-        { t: 'linea', a: [en[0] + 11, suelo], b: [en[0] + 11, en[1] - 45], c: D, w: 2.5 },
+        { t: 'linea', a: [en[0] + 11, suelo], b: [en[0] + 11, Math.min(en[1], j.cabeza[1]) - 12], c: D, w: 2.5 },
         { t: 'circulo', c0: en, r: 2.6, c: M },
         { t: 'linea', a: [en[0] - 4, en[1]], b: [en[0] + 11, en[1]], c: M, w: 2 },
       ];
@@ -225,6 +236,11 @@ function material(m: Material, j: Js, suelo: number): Forma[] {
     }
     case 'cajon': {
       const w = m.ancho ?? 22;
+      if ('bajo' in m) {
+        const q = (j as Record<string, Punto>)[m.bajo];
+        const y = q[1] + R.antebrazo;
+        return [{ t: 'rect', x: q[0] - w / 2, y, w, h: suelo - y, c: D, rx: 1.5 }];
+      }
       return [{ t: 'rect', x: j.cadera[0] + m.x - w / 2, y: suelo - m.alto, w, h: m.alto, c: D, rx: 1.5 }];
     }
     case 'esterilla':
