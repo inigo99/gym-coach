@@ -56,3 +56,13 @@ test('leerCopia rechaza ficheros que no son copias', () => {
   conCatalogo.tablas.ejercicio = [{ id: PRESS }];
   expect(() => leerCopia(JSON.stringify(conCatalogo))).toThrow('usuario');
 });
+
+test('las copias de formato 1 (sin programas) se siguen leyendo', () => {
+  const vieja = exportar() as unknown as { formato: number; tablas: Record<string, unknown> };
+  vieja.formato = 1;
+  delete vieja.tablas.programa;
+  delete vieja.tablas.programa_rutina;
+  const c = leerCopia(JSON.stringify(vieja));
+  expect(c.tablas.programa).toEqual([]);
+  expect(() => importar(c)).not.toThrow();
+});

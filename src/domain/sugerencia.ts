@@ -4,7 +4,7 @@
  */
 import type { Ejercicio, Equipo } from '@/catalogo';
 
-export type Zona = 'cuerpo' | 'superior' | 'pierna' | 'pecho' | 'espalda' | 'hombros' | 'brazos' | 'gluteos' | 'core' | 'hiit';
+export type Zona = 'cuerpo' | 'superior' | 'pierna' | 'empuje' | 'tiron' | 'pecho' | 'espalda' | 'hombros' | 'brazos' | 'gluteos' | 'core' | 'hiit';
 export type NivelSug = 'principiante' | 'intermedio' | 'avanzado';
 export type Objetivo = 'fuerza' | 'musculo' | 'resistencia';
 export type MaterialSug = 'gimnasio' | 'mancuernas' | 'casa';
@@ -17,6 +17,8 @@ export const ZONAS: { id: Zona; nombre: string }[] = [
   { id: 'superior', nombre: 'Tren superior' },
   { id: 'pierna', nombre: 'Pierna' },
   { id: 'gluteos', nombre: 'Glúteo' },
+  { id: 'empuje', nombre: 'Empuje' },
+  { id: 'tiron', nombre: 'Tirón' },
   { id: 'pecho', nombre: 'Pecho' },
   { id: 'espalda', nombre: 'Espalda' },
   { id: 'hombros', nombre: 'Hombros' },
@@ -57,6 +59,8 @@ const HUECOS: Record<Exclude<Zona, 'hiit'>, string[]> = {
   cuerpo: ['cuadriceps', 'pecho', 'dorsales', 'isquios', 'hombros', 'espalda_media', 'gluteos', 'abdomen', 'biceps', 'triceps'],
   superior: ['pecho', 'dorsales', 'hombros', 'espalda_media', 'pecho', 'triceps', 'biceps', 'abdomen', 'hombros'],
   pierna: ['cuadriceps', 'isquios', 'gluteos', 'cuadriceps', 'isquios', 'gemelos', 'aductores', 'abdomen'],
+  empuje: ['pecho', 'hombros', 'pecho', 'triceps', 'hombros', 'triceps', 'abdomen'],
+  tiron: ['dorsales', 'espalda_media', 'dorsales', 'biceps', 'trapecio', 'biceps', 'lumbar'],
   gluteos: ['gluteos', 'isquios', 'gluteos', 'abductores', 'cuadriceps', 'gluteos', 'lumbar'],
   pecho: ['pecho', 'pecho', 'pecho', 'triceps', 'hombros', 'triceps', 'abdomen'],
   espalda: ['dorsales', 'espalda_media', 'dorsales', 'espalda_media', 'biceps', 'lumbar', 'biceps', 'trapecio'],

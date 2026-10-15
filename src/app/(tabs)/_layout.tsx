@@ -13,12 +13,13 @@ const icono = (nombre: string) =>
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: C.acento, tabBarInactiveTintColor: C.tenue }}>
-      <Tabs.Screen name="index" options={{ title: 'Entrenar', tabBarIcon: icono('barbell') }} />
-      <Tabs.Screen name="rutinas" options={{ title: 'Rutinas', tabBarIcon: icono('calendar') }} />
-      <Tabs.Screen name="ejercicios" options={{ title: 'Ejercicios', tabBarIcon: icono('search') }} />
-      <Tabs.Screen name="progreso" options={{ title: 'Progreso', tabBarIcon: icono('stats-chart') }} />
-      <Tabs.Screen name="perfil" options={{ title: 'Perfil', tabBarIcon: icono('person') }} />
+    // Cada pestaña tiene su propia pila (con su cabecera); la barra se ve también en las fichas.
+    <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: C.acento, tabBarInactiveTintColor: C.tenue }}>
+      <Tabs.Screen name="(entrenar)" options={{ title: 'Entrenar', tabBarIcon: icono('barbell') }} />
+      <Tabs.Screen name="(rutinas)" options={{ title: 'Rutinas', tabBarIcon: icono('calendar') }} />
+      <Tabs.Screen name="(ejercicios)" options={{ title: 'Ejercicios', tabBarIcon: icono('search') }} />
+      <Tabs.Screen name="(progreso)" options={{ title: 'Progreso', tabBarIcon: icono('stats-chart') }} />
+      <Tabs.Screen name="(perfil)" options={{ title: 'Perfil', tabBarIcon: icono('person') }} />
     </Tabs>
   );
 }

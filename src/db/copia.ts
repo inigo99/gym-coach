@@ -4,7 +4,7 @@ import type { SQLiteTable } from 'drizzle-orm/sqlite-core';
 import { db } from '.';
 import * as t from './schema';
 
-export const FORMATO = 1;
+export const FORMATO = 2; // 2: añade programas; las copias de formato 1 se leen con programas vacíos
 
 // Orden de inserción (padres antes que hijos); se borra al revés.
 const TABLAS = {
@@ -17,6 +17,8 @@ const TABLAS = {
   sesion: t.sesion,
   sesion_ejercicio: t.sesionEjercicio,
   serie: t.serie,
+  programa: t.programa,
+  programa_rutina: t.programaRutina,
 } as const;
 type Nombre = keyof typeof TABLAS;
 
@@ -39,7 +41,8 @@ export function leerCopia(texto: string): Copia {
   }
   const o = c as Partial<Copia>;
   if (o?.app !== 'gym-coach' || typeof o.tablas !== 'object' || !o.tablas) throw new Error('No es una copia de gym-coach.');
-  if (o.formato !== FORMATO) throw new Error(`Formato de copia no compatible (${o.formato}).`);
+  if (o.formato !== FORMATO && o.formato !== 1) throw new Error(`Formato de copia no compatible (${o.formato}).`);
+  if (o.formato === 1) Object.assign(o.tablas, { programa: [], programa_rutina: [] });
   for (const n of Object.keys(TABLAS) as Nombre[]) {
     const filas = o.tablas[n];
     if (!Array.isArray(filas) || filas.some((f) => typeof f !== 'object' || f === null || Array.isArray(f))) throw new Error(`Tabla «${n}» mal formada.`);

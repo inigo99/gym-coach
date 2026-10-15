@@ -1,4 +1,4 @@
-import { asc, eq, sql } from 'drizzle-orm';
+import { asc, desc, eq, isNull, sql } from 'drizzle-orm';
 import { useLiveQuery } from '@/db/use-live-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -8,7 +8,8 @@ import { Boton, Seccion } from '@/components/ui';
 import { C } from '@/constants/theme';
 import { db } from '@/db';
 import { crearRutina, guardarHorario, quitarHorario } from '@/db/rutina';
-import { horario, rutina, rutinaEjercicio, type Horario, type Rutina } from '@/db/schema';
+import { horario, programa, rutina, rutinaEjercicio, type Horario, type Rutina } from '@/db/schema';
+import { OBJETIVOS_PROGRAMA, semanaActual } from '@/domain/programa';
 import { DIAS, leerHora, textoHora } from '@/domain/horario';
 
 export default function Rutinas() {
@@ -21,6 +22,10 @@ export default function Rutinas() {
       .orderBy(asc(rutina.nombre)),
   );
   const { data: dias } = useLiveQuery(db.select().from(horario));
+  const { data: programas } = useLiveQuery(db.select().from(programa).where(isNull(programa.fin)).orderBy(desc(programa.id)).limit(1));
+  const p = programas[0];
+  const semana = p && semanaActual(p.inicio, p.semanas, new Date());
+  const programaActivo = p && `${OBJETIVOS_PROGRAMA.find((o) => o.id === p.objetivo)!.nombre} · ${semana ? `semana ${semana} de ${p.semanas}` : 'completado'}`;
   const [nueva, setNueva] = useState('');
   const [editando, setEditando] = useState<number | null>(null);
 
@@ -33,6 +38,15 @@ export default function Rutinas() {
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 24 }} keyboardShouldPersistTaps="handled">
       <Seccion titulo="Rutinas">
+        <Pressable
+          onPress={() => router.push(programaActivo ? '/programa' : '/programa/nuevo')}
+          accessibilityRole="button"
+          style={{ backgroundColor: C.acento, borderRadius: 10, padding: 14, gap: 4 }}>
+          <Text style={{ color: C.fondo, fontSize: 16, fontWeight: '700' }}>{programaActivo ? `Programa: ${programaActivo}` : 'Empezar un programa'}</Text>
+          <Text style={{ color: C.fondo, fontSize: 13 }}>
+            {programaActivo ? 'Pauta de la semana, sesiones hechas, peso y alimentación.' : 'Perder peso, ganar músculo o definir: rutinas, horario y pauta semana a semana.'}
+          </Text>
+        </Pressable>
         <Pressable
           onPress={() => router.push('/rutina/sugerir')}
           accessibilityRole="button"

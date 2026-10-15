@@ -2,7 +2,7 @@
 
 App móvil (Android e iOS) para registrar el entrenamiento en el gimnasio: perfil y mediciones, series de fuerza y cardio, rutinas con horario y avisos, gráficas de progreso, fichas de técnica con mapa muscular y nivel por grupo muscular. Funciona sin conexión: los datos se guardan en el móvil (SQLite).
 
-> Estado: v1.2.0. Catálogo de 56 ejercicios con 179 variantes (español e inglés) e ilustraciones propias; buscador con el material primero y panel de filtros; generador de rutinas por zona, objetivo, nivel, material, tiempo y esfuerzo, y alternativas en cada ejercicio (reglas fijas, sin IA).
+> Estado: v1.3.0. Catálogo de 56 ejercicios con 179 variantes (español e inglés) e ilustraciones propias; buscador con el material primero; generador de rutinas y alternativas; programas de 4–12 semanas para perder peso, ganar músculo o definir, con pauta semanal, cardio, seguimiento y alimentación orientativa (reglas fijas, sin IA).
 
 ## Stack
 
@@ -26,7 +26,8 @@ npx expo start          # escanear el QR con la app Expo Go (iPhone) o abrir el 
 ## Estructura
 
 ```
-src/app/        pantallas (expo-router): (tabs)/ Entrenar, Rutinas, Ejercicios (buscador), Progreso (con Cuerpo), Perfil; rutina/[id] editor; ejercicio/[id] ficha (técnica, músculos, nivel, progreso)
+src/app/        pantallas (expo-router): (tabs)/ con una pila por pestaña — (entrenar), (rutinas) con rutina/[id], rutina/sugerir y programa/, (ejercicios), (progreso) con Cuerpo, (perfil); ejercicio/[id] dentro de cada pestaña
+src/pantallas/  pantallas compartidas entre pestañas (ficha de ejercicio: técnica, músculos, nivel, progreso, alternativas)
 src/notificaciones.ts  avisos del horario (semanales) y del fin del descanso
 src/catalogo/   familias de ejercicios con sus variantes, técnica y buscador
 src/ilustracion/ figura de perfil, material y poses de inicio y final de cada ejercicio

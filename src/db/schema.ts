@@ -98,3 +98,29 @@ export type Serie = typeof serie.$inferSelect;
 export type Rutina = typeof rutina.$inferSelect;
 export type RutinaEjercicio = typeof rutinaEjercicio.$inferSelect;
 export type Horario = typeof horario.$inferSelect;
+
+/** Programa de varias semanas. Como mucho uno activo (fin = null). */
+export const programa = sqliteTable('programa', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  objetivo: text('objetivo', { enum: ['perder_peso', 'musculo', 'definir'] }).notNull(),
+  dias: integer('dias').notNull(),
+  semanas: integer('semanas').notNull(),
+  nivel: text('nivel', { enum: ['principiante', 'intermedio', 'avanzado'] }).notNull(),
+  material: text('material', { enum: ['gimnasio', 'mancuernas', 'casa'] }).notNull(),
+  minutos: integer('minutos').notNull(),
+  inicio: text('inicio').notNull(), // AAAA-MM-DD, lunes de la primera semana
+  fin: text('fin'), // AAAA-MM-DD si se terminó antes; null = activo
+});
+
+/** Rutinas creadas por el programa y el día de la semana de cada una. */
+export const programaRutina = sqliteTable(
+  'programa_rutina',
+  {
+    programaId: integer('programa_id').notNull().references(() => programa.id, { onDelete: 'cascade' }),
+    rutinaId: integer('rutina_id').notNull().references(() => rutina.id, { onDelete: 'cascade' }),
+    dia: integer('dia').notNull(), // 1 = lunes … 7 = domingo
+  },
+  (t) => [primaryKey({ columns: [t.programaId, t.rutinaId] })],
+);
+
+export type Programa = typeof programa.$inferSelect;

@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { Stack } from 'expo-router/stack';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from 'react-native';
 
@@ -54,6 +55,7 @@ export default function SugerirRutina() {
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 22, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
+      <Stack.Screen options={{ title: 'Sugerir rutina' }} />
       <Seccion titulo="Qué quieres entrenar">
         <Chips opciones={ZONAS} valor={zona} onChange={setZona} />
       </Seccion>
