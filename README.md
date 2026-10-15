@@ -2,7 +2,7 @@
 
 App móvil (Android e iOS) para registrar el entrenamiento en el gimnasio: perfil y mediciones, series de fuerza y cardio, rutinas con horario y avisos, gráficas de progreso, fichas de técnica con mapa muscular y nivel por grupo muscular. Funciona sin conexión: los datos se guardan en el móvil (SQLite).
 
-> Estado: v1.1.3. Catálogo de 56 ejercicios con 179 variantes (nombres en español e inglés), buscador por qué hacen, qué entrenan y qué usan, e ilustraciones propias de inicio a final con los músculos resaltados.
+> Estado: v1.2.0. Catálogo de 56 ejercicios con 179 variantes (español e inglés) e ilustraciones propias; buscador con el material primero y panel de filtros; generador de rutinas por zona, objetivo, nivel, material, tiempo y esfuerzo, y alternativas en cada ejercicio (reglas fijas, sin IA).
 
 ## Stack
 

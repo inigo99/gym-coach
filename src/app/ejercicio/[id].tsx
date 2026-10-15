@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 
 import musculos from '@/assets/data/musculos.json';
-import { EJERCICIO, EQUIPOS } from '@/catalogo';
+import { EJERCICIO, EJERCICIOS, EQUIPOS } from '@/catalogo';
 import { Cuerpo } from '@/components/cuerpo';
 import { Grafica } from '@/components/grafica';
 import { Ilustracion } from '@/components/ilustracion';
@@ -18,6 +18,7 @@ import { ejercicio, medicion, serie, sesion } from '@/db/schema';
 import { nivel } from '@/domain/nivel';
 import { enRango, formatoMetrica, METRICAS, RANGOS, record, serieTemporal, type Metrica } from '@/domain/progreso';
 import { textoSerie } from '@/domain/sesion';
+import { alternativas as buscarAlternativas } from '@/domain/sugerencia';
 import { ESTANDARES, useNiveles } from '@/hooks/use-niveles';
 
 const NOMBRE = Object.fromEntries(musculos.map((m) => [m.id, m.nombre]));
@@ -48,6 +49,7 @@ export default function FichaEjercicio() {
   if (!ej) return null;
 
   const ficha = cat?.tecnica;
+  const alternativas = cat ? buscarAlternativas(cat, EJERCICIOS) : [];
   const familia = cat?.familia;
   const m = metricas.find((x) => x.id === metrica) ?? metricas[0];
   const series = filas.map((f) => ({ ...f.s, inicio: f.inicio }));
@@ -92,6 +94,23 @@ export default function FichaEjercicio() {
             <Ilustracion ejercicio={cat} ancho={width - 32} />
           </View>
           {cat.nota && <Text style={{ color: C.texto, lineHeight: 21 }}>{cat.nota}</Text>}
+        </Seccion>
+      )}
+
+      {alternativas.length > 0 && (
+        <Seccion titulo="Alternativas">
+          <Text style={{ color: C.tenue, fontSize: 13 }}>Otros ejercicios que trabajan lo mismo, por si la máquina está ocupada o quieres variar.</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {alternativas.map((a) => (
+              <Pressable
+                key={a.id}
+                onPress={() => router.push({ pathname: '/ejercicio/[id]', params: { id: a.id } })}
+                accessibilityRole="link"
+                style={{ minHeight: 40, paddingHorizontal: 12, justifyContent: 'center', borderRadius: 20, backgroundColor: C.tarjeta }}>
+                <Text style={{ color: C.texto, fontWeight: '600' }}>{a.nombreCompleto}</Text>
+              </Pressable>
+            ))}
+          </View>
         </Seccion>
       )}
 

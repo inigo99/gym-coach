@@ -42,6 +42,7 @@ export default function Layout() {
       <AvisosHorario />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="rutina/sugerir" options={{ title: 'Sugerir rutina', headerBackTitle: 'Rutinas' }} />
         <Stack.Screen name="rutina/[id]" options={{ title: 'Rutina', headerBackTitle: 'Rutinas' }} />
         <Stack.Screen name="ejercicio/[id]" options={{ title: 'Ejercicio', headerBackTitle: 'Atrás' }} />
       </Stack>

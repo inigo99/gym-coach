@@ -15,6 +15,15 @@ export function borrarRutina(id: number) {
   db.delete(rutina).where(eq(rutina.id, id)).run(); // ejercicios y horario en cascada; sesiones pasan a rutina null
 }
 
+/** Crea una rutina ya con sus ejercicios y objetivos (rutina sugerida). Devuelve su id. */
+export function guardarRutinaCompleta(nombre: string, filas: Omit<typeof rutinaEjercicio.$inferInsert, 'rutinaId' | 'orden'>[]) {
+  return db.transaction((tx) => {
+    const { id } = tx.insert(rutina).values({ nombre }).returning({ id: rutina.id }).get();
+    filas.forEach((f, orden) => tx.insert(rutinaEjercicio).values({ ...f, rutinaId: id, orden }).run());
+    return id;
+  });
+}
+
 /** Añade al final con un objetivo por defecto según el tipo de ejercicio. */
 export function anadirARutina(rutinaId: number, ejercicioId: string) {
   const { registro } = db.select({ registro: ejercicio.registro }).from(ejercicio).where(eq(ejercicio.id, ejercicioId)).get()!;

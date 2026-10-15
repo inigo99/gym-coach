@@ -33,6 +33,13 @@ export default function Rutinas() {
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 24 }} keyboardShouldPersistTaps="handled">
       <Seccion titulo="Rutinas">
+        <Pressable
+          onPress={() => router.push('/rutina/sugerir')}
+          accessibilityRole="button"
+          style={{ backgroundColor: C.tarjeta, borderRadius: 10, padding: 14, gap: 4, borderWidth: 1, borderColor: C.acento }}>
+          <Text style={{ color: C.acento, fontSize: 16, fontWeight: '700' }}>Sugerir una rutina</Text>
+          <Text style={{ color: C.tenue, fontSize: 13 }}>Elige zona, objetivo, nivel, material y tiempo, y te propone los ejercicios con series y descansos.</Text>
+        </Pressable>
         {rutinas.map((r) => (
           <Pressable key={r.id} onPress={() => router.push(`/rutina/${r.id}`)} accessibilityRole="button" style={{ backgroundColor: C.tarjeta, borderRadius: 10, padding: 14, gap: 4 }}>
             <Text style={{ color: C.texto, fontSize: 16, fontWeight: '600' }}>{r.nombre}</Text>

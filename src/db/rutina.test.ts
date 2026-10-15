@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- jest.mock necesita require */
 import { asc, eq } from 'drizzle-orm';
 
-import { anadirARutina, borrarRutina, crearRutina, guardarHorario, mover, quitarHorario } from './rutina';
+import { anadirARutina, borrarRutina, crearRutina, guardarRutinaCompleta, guardarHorario, mover, quitarHorario } from './rutina';
 import { horario, rutinaEjercicio, sesion, sesionEjercicio } from './schema';
 import { sembrarCatalogo } from './semilla';
 import { anadirSerie, empezarSesion, terminarSesion } from './sesion';
@@ -47,4 +47,14 @@ test('rutina: objetivos por defecto, orden y sesión desde rutina', () => {
   expect(db.select().from(horario).all()).toEqual([]);
   expect(db.select().from(sesion).where(eq(sesion.id, s)).get().rutinaId).toBeNull();
   quitarHorario(1);
+});
+
+test('rutina sugerida: se guarda con sus objetivos y en orden', () => {
+  const r = guardarRutinaCompleta('Sugerida', [
+    { ejercicioId: CURL, series: 4, repsMin: 6, repsMax: 10, descansoS: 120 },
+    { ejercicioId: PRESS, series: 3, repsMin: 8, repsMax: 12, descansoS: 90 },
+  ]);
+  expect(orden(r)).toEqual([CURL, PRESS]);
+  const curl = db.select().from(rutinaEjercicio).where(eq(rutinaEjercicio.rutinaId, r)).all().find((e: { ejercicioId: string }) => e.ejercicioId === CURL);
+  expect([curl.series, curl.repsMin, curl.repsMax, curl.descansoS]).toEqual([4, 6, 10, 120]);
 });
