@@ -1,7 +1,7 @@
 import { asc, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { useLiveQuery } from '@/db/use-live-query';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Boton, BotonIcono, Seccion } from '@/components/ui';
 import { Cronometro, Descanso } from '@/components/cronometros';
@@ -14,6 +14,7 @@ import { anadirEjercicio, borrarSesion, empezarSesion, terminarSesion } from '@/
 import { diaDe, textoHora } from '@/domain/horario';
 import { pesoEnFecha } from '@/domain/progreso';
 import { reloj, resumen, textoSerie } from '@/domain/sesion';
+import { alerta } from '@/alerta';
 
 export default function Entrenar() {
   const { data: abiertas } = useLiveQuery(db.select().from(sesion).where(isNull(sesion.fin)).limit(1));
@@ -36,7 +37,7 @@ function SesionEnCurso({ id, inicio, rutinaId, pesoCorporal }: { id: number; ini
   const terminar = () => {
     const registro = Object.fromEntries(ejercicios.map(({ ej }) => [ej.id, ej.registro]));
     const r = resumen(series.map((s) => ({ ...s, registro: registro[s.ejercicioId] })), pesoCorporal);
-    Alert.alert('¿Terminar la sesión?', series.length ? `${r.series} series · ${Math.round(r.volumenKg)} kg de volumen` : 'No hay series: se descartará.', [
+    alerta('¿Terminar la sesión?', series.length ? `${r.series} series · ${Math.round(r.volumenKg)} kg de volumen` : 'No hay series: se descartará.', [
       { text: 'Seguir', style: 'cancel' },
       { text: 'Terminar', onPress: () => terminarSesion(id) },
     ]);
@@ -141,7 +142,7 @@ function Historial({ mediciones }: { mediciones: { fecha: string; pesoKg: number
                       texto="🗑"
                       etiqueta="Borrar sesión"
                       onPress={() =>
-                        Alert.alert('¿Borrar la sesión?', 'No se puede deshacer.', [
+                        alerta('¿Borrar la sesión?', 'No se puede deshacer.', [
                           { text: 'Cancelar', style: 'cancel' },
                           { text: 'Borrar', style: 'destructive', onPress: () => borrarSesion(ses.id) },
                         ])

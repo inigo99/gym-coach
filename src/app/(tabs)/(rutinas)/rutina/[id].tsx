@@ -3,7 +3,7 @@ import { useLiveQuery } from '@/db/use-live-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import { useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, TextInput, View } from 'react-native';
 
 import { ElegirEjercicio } from '@/components/elegir-ejercicio';
 import { Boton, BotonIcono, Campo, num } from '@/components/ui';
@@ -13,6 +13,7 @@ import { actualizarObjetivo, anadirARutina, borrarRutina, mover, quitarDeRutina,
 import { ejercicio, rutina, rutinaEjercicio, sesion, type Ejercicio, type RutinaEjercicio } from '@/db/schema';
 import { empezarSesion } from '@/db/sesion';
 import { leerReps } from '@/domain/horario';
+import { alerta } from '@/alerta';
 
 export default function EditarRutina() {
   const id = Number(useLocalSearchParams<{ id: string }>().id);
@@ -26,7 +27,7 @@ export default function EditarRutina() {
   if (!r) return null;
 
   const borrar = () =>
-    Alert.alert(`¿Borrar ${r.nombre}?`, 'Se quita también del horario. Las sesiones hechas se conservan.', [
+    alerta(`¿Borrar ${r.nombre}?`, 'Se quita también del horario. Las sesiones hechas se conservan.', [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Borrar',

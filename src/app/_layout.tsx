@@ -1,6 +1,5 @@
 import { eq } from 'drizzle-orm';
 import { useLiveQuery } from '@/db/use-live-query';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { DarkTheme, ThemeProvider } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import * as SplashScreen from 'expo-splash-screen';
@@ -10,16 +9,16 @@ import { Text, View } from 'react-native';
 import { C } from '@/constants/theme';
 import { db } from '@/db';
 import { horario, rutina } from '@/db/schema';
+import { usePrepararBD } from '@/db/preparar';
 import { sembrarCatalogo } from '@/db/semilla';
 import { reprogramarHorario } from '@/notificaciones';
-import migrations from '../../drizzle/migrations';
 
 SplashScreen.preventAutoHideAsync();
 
 const tema = { ...DarkTheme, colors: { ...DarkTheme.colors, background: C.fondo, card: C.fondo, primary: C.acento, text: C.texto, border: C.borde } };
 
 export default function Layout() {
-  const { success, error } = useMigrations(db, migrations);
+  const { success, error } = usePrepararBD();
 
   useEffect(() => {
     if (!success) return;

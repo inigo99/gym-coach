@@ -6,7 +6,7 @@ App móvil (Android e iOS) para registrar el entrenamiento en el gimnasio: perfi
 
 ## Stack
 
-Expo (React Native) + TypeScript · expo-router · expo-sqlite + Drizzle ORM · expo-notifications (locales) · react-native-svg (gráficas) · Jest. Solo librerías incluidas en **Expo Go**.
+Expo (React Native) + TypeScript · expo-router · expo-sqlite + Drizzle ORM · expo-notifications (locales) · react-native-svg (gráficas) · Jest. En web, sql.js. En el móvil, solo librerías incluidas en **Expo Go**.
 
 ## Arrancar
 
@@ -41,15 +41,13 @@ drizzle/        migraciones generadas
 
 ## Distribución
 
-**iPhone (Expo Go, gratis):**
+**iPhone (app web instalable, gratis):** abre [inigo99.github.io/gym-coach](https://inigo99.github.io/gym-coach/) en Safari → botón Compartir → **Añadir a pantalla de inicio**. Queda como una app más, a pantalla completa y funciona sin conexión. Se publica sola con cada cambio en `master` (`.github/workflows/web.yml`, GitHub Pages).
 
-```bash
-npx eas-cli@latest login
-npx eas-cli@latest init                    # una vez: crea el proyecto en Expo y añade su id a app.json
-npx eas-cli@latest update --branch main    # publica la versión actual
-```
+- Los datos se guardan en el iPhone, dentro de la app web (SQLite con [sql.js](https://github.com/sql-js/sql.js) en IndexedDB; en el móvil Android se usa expo-sqlite). Haz copias en Perfil → Copia de seguridad: si se borra la app o los datos de Safari, se pierden.
+- En la app web no hay avisos del horario ni del descanso (Safari no permite notificaciones programadas sin servidor).
+- Para probarla en local: `npm run web:export && npx expo serve`.
 
-Después se abre en Expo Go desde la sesión de Expo, sin el PC encendido.
+Para desarrollo también vale Expo Go: `npx expo start` y escanear el QR.
 
 **Android (APK):** se descarga de [Releases](https://github.com/inigo99/gym-coach/releases/latest). Lo genera GitHub Actions (`.github/workflows/apk.yml`): al subir a `master` un cambio de `expo.version` en `app.json` compila el APK y crea la Release `v{versión}` con él. También se puede lanzar a mano desde la pestaña Actions.
 

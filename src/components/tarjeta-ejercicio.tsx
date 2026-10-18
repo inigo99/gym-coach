@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { Boton, BotonIcono, Campo, num } from '@/components/ui';
 import { C } from '@/constants/theme';
@@ -7,6 +7,7 @@ import type { Ejercicio, RutinaEjercicio, Serie } from '@/db/schema';
 import { anadirSerie, borrarSerie, quitarEjercicio, seriesUltimaVez } from '@/db/sesion';
 import { textoObjetivo } from '@/domain/horario';
 import { reloj, textoSerie } from '@/domain/sesion';
+import { alerta } from '@/alerta';
 
 type Campos = { a: string | null; b: string | null }; // null = usar el valor propuesto
 
@@ -61,7 +62,7 @@ export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number
 
   const quitar = () =>
     series.length
-      ? Alert.alert(`¿Quitar ${ej.nombre}?`, 'Se borrarán sus series de hoy.', [
+      ? alerta(`¿Quitar ${ej.nombre}?`, 'Se borrarán sus series de hoy.', [
           { text: 'Cancelar', style: 'cancel' },
           { text: 'Quitar', style: 'destructive', onPress: () => quitarEjercicio(sesionId, ej.id) },
         ])

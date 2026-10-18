@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { router } from 'expo-router';
 import { Stack } from 'expo-router/stack';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Grafica } from '@/components/grafica';
 import { Boton, Seccion } from '@/components/ui';
@@ -14,6 +14,7 @@ import { edad } from '@/domain/calculos';
 import { DIAS } from '@/domain/horario';
 import { pautaNutricion } from '@/domain/nutricion';
 import { finPrevisto, OBJETIVOS_PROGRAMA, pautaSemana, semanaActual, sesionesPrevistas, textoCardio } from '@/domain/programa';
+import { alerta } from '@/alerta';
 
 const kg = (v: number) => `${v.toFixed(1).replace('.', ',')} kg`;
 const fechaCorta = (s: string) => new Date(`${s}T12:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
@@ -61,7 +62,7 @@ export default function ProgramaActivo() {
       : null;
 
   const terminar = () =>
-    Alert.alert('¿Terminar el programa?', 'Las rutinas y el horario se quedan como están; puedes cambiarlos cuando quieras.', [
+    alerta('¿Terminar el programa?', 'Las rutinas y el horario se quedan como están; puedes cambiarlos cuando quieras.', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Terminar', style: 'destructive', onPress: () => terminarPrograma(p.id, hoy.toISOString().slice(0, 10)) },
     ]);

@@ -1,12 +1,9 @@
 import { eq } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/expo-sqlite';
-import { openDatabaseSync } from 'expo-sqlite';
 
+import { db } from './conexion';
 import * as schema from './schema';
 
-const cliente = openDatabaseSync('gym-coach.db', { enableChangeListener: true });
-cliente.execSync('PRAGMA foreign_keys = ON'); // para los ON DELETE CASCADE
-export const db = drizzle(cliente, { schema });
+export { db };
 
 export function guardarPerfil(datos: Omit<schema.Perfil, 'id'>) {
   db.insert(schema.perfil)

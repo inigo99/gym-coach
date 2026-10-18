@@ -1,4 +1,4 @@
-import { addDatabaseChangeListener } from 'expo-sqlite';
+import { alCambiar } from './cambios';
 import { useEffect, useState } from 'react';
 
 /**
@@ -13,7 +13,7 @@ export function useLiveQuery<T>(query: PromiseLike<T>, deps: unknown[] = []) {
     let vivo = true;
     const cargar = () => query.then((d) => vivo && setData(d), console.error);
     cargar();
-    const l = addDatabaseChangeListener(cargar);
+    const l = alCambiar(cargar);
     return () => {
       vivo = false;
       l.remove();
