@@ -50,5 +50,7 @@ export function buscar({ texto = '', categoria, musculo, equipo }: Filtros) {
     );
     if (vs.length) out.push({ familia: f, variantes: vs });
   }
+  // Con un músculo elegido, primero los ejercicios en los que es principal (el orden se mantiene dentro de cada grupo).
+  if (musculo) out.sort((a, b) => +!a.variantes.some((e) => e.principales.includes(musculo)) - +!b.variantes.some((e) => e.principales.includes(musculo)));
   return out;
 }

@@ -52,3 +52,10 @@ test('niveles: tipo reps solo en ejercicios de peso corporal y ratio en los de c
     expect(n.tipo).toBe(EJERCICIO.get(id)!.registro === 'peso_corporal' ? 'reps' : 'ratio');
   }
 });
+
+test('buscar por músculo: primero donde es principal', () => {
+  const r = buscar({ musculo: 'biceps' });
+  expect(r[0].familia.id).toBe('curl_biceps');
+  const i = r.findIndex((x) => x.familia.id === 'remo');
+  expect(i).toBeGreaterThan(r.findIndex((x) => x.familia.id === 'curl_biceps'));
+});

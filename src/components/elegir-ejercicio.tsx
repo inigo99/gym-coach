@@ -1,40 +1,32 @@
-import { useMemo, useState } from 'react';
-import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { FlatList, Modal, Pressable, Text, View } from 'react-native';
 
-import { buscar } from '@/catalogo';
+import { FiltrosEjercicios, useFiltrosEjercicios } from '@/components/filtros-ejercicios';
 import { BotonIcono } from '@/components/ui';
 import { C } from '@/constants/theme';
 
-/** Selector de ejercicio (variante) con el buscador del catálogo, en español o inglés. */
+/** Selector de ejercicio (variante): buscador por nombre en español o inglés, con los mismos filtros que la pestaña Ejercicios. */
 export function ElegirEjercicio(props: { visible: boolean; yaEnSesion: string[]; onElegir: (id: string) => void; onCerrar: () => void }) {
-  const [q, setQ] = useState('');
-  const lista = useMemo(
-    () => buscar({ texto: q }).flatMap(({ variantes }) => variantes.filter((v) => !props.yaEnSesion.includes(v.id))),
-    [q, props.yaEnSesion],
-  );
+  const f = useFiltrosEjercicios();
+  const lista = f.resultados.flatMap(({ variantes }) => variantes.filter((v) => !props.yaEnSesion.includes(v.id)));
 
   return (
     <Modal visible={props.visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={props.onCerrar}>
       <View style={{ flex: 1, backgroundColor: C.fondo }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 16 }}>
-          <TextInput
-            value={q}
-            onChangeText={setQ}
-            placeholder="Buscar en español o inglés"
-            placeholderTextColor={C.tenue}
-            accessibilityLabel="Buscar ejercicio"
-            autoCorrect={false}
-            style={{ flex: 1, minHeight: 44, backgroundColor: C.tarjeta, color: C.texto, borderRadius: 10, paddingHorizontal: 12, fontSize: 16 }}
-          />
-          <BotonIcono texto="×" etiqueta="Cerrar" onPress={props.onCerrar} />
-        </View>
         <FlatList
           data={lista}
           keyExtractor={(e) => e.id}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 8 }}
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={{ paddingBottom: 24, gap: 8 }}
+          ListHeaderComponent={
+            <FiltrosEjercicios f={f} resumen={lista.length === 1 ? '1 ejercicio' : `${lista.length} ejercicios`} junto={<BotonIcono texto="×" etiqueta="Cerrar" onPress={props.onCerrar} />} />
+          }
+          ListEmptyComponent={<Text style={{ color: C.tenue, paddingHorizontal: 16 }}>Ningún ejercicio coincide. Prueba con otra palabra o quita algún filtro.</Text>}
           renderItem={({ item }) => (
-            <Pressable onPress={() => props.onElegir(item.id)} accessibilityRole="button" style={{ backgroundColor: C.tarjeta, borderRadius: 10, padding: 14, minHeight: 44, gap: 2 }}>
+            <Pressable
+              onPress={() => props.onElegir(item.id)}
+              accessibilityRole="button"
+              style={{ marginHorizontal: 16, backgroundColor: C.tarjeta, borderRadius: 10, padding: 14, minHeight: 44, gap: 2 }}>
               <Text style={{ color: C.texto, fontSize: 16 }}>{item.nombreCompleto}</Text>
               <Text style={{ color: C.tenue, fontSize: 13 }}>{item.en}</Text>
             </Pressable>
