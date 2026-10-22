@@ -45,24 +45,34 @@ test('Programa sin ninguno activo invita a empezar', async () => {
   expect(await pintar('./app/(tabs)/(rutinas)/programa/index')).toContain('Empezar un programa');
 });
 
-test('Añadir ejercicio: buscador por nombre con filtros de material', async () => {
+test('Añadir ejercicio: primero el ejercicio y dentro la variante, con filtros y búsqueda por variante', async () => {
   const { TextInput } = require('react-native');
   const { ElegirEjercicio } = require('./components/elegir-ejercicio');
+  const elegido = jest.fn();
   let r: ReactTestRenderer;
   await act(async () => {
-    r = create(<ElegirEjercicio visible yaEnSesion={[]} onElegir={() => {}} onCerrar={() => {}} />);
+    r = create(<ElegirEjercicio visible yaEnSesion={[]} onElegir={elegido} onCerrar={() => {}} />);
   });
   const textos = () => r.root.findAllByType(Text).map((n) => [n.props.children].flat(9).join(''));
+  const pulsar = async (texto: string) => {
+    let n = r.root.findAllByType(Text).find((t) => [t.props.children].flat(9).join('') === texto)!;
+    while (!n.props.onPress) n = n.parent!;
+    await act(async () => n.props.onPress());
+  };
   expect(textos()).toContain('Filtros');
-  // Material: Polea → solo ejercicios con polea
-  // El chip "Polea": desde su texto, subir hasta el elemento que se puede pulsar.
-  let polea = r!.root.findAllByType(Text).find((t) => t.props.children === 'Polea')!;
-  while (!polea.props.onPress) polea = polea.parent!;
-  await act(async () => polea.props.onPress());
-  expect(textos()).toContain('Remo · En polea, sentado');
-  expect(textos()).not.toContain('Press de pecho · Con barra en banco');
-  // Y además por nombre
-  await act(async () => r.root.findByType(TextInput).props.onChangeText('triceps'));
-  expect(textos()).toContain('Extensión de tríceps en polea · Con cuerda');
-  expect(textos()).not.toContain('Remo · En polea, sentado');
+  // Material: Polea → ejercicios con alguna variante de polea; aún sin abrir, no se ven las variantes
+  await pulsar('Polea');
+  expect(textos()).toContain('Remo');
+  expect(textos()).not.toContain('Peso muerto');
+  expect(textos()).not.toContain('En polea, sentado');
+  // Al tocar el ejercicio se abren sus variantes (solo las de polea) y se elige una
+  await pulsar('Remo');
+  expect(textos()).toContain('En polea, sentado');
+  expect(textos()).not.toContain('Con barra, inclinado');
+  await pulsar('En polea, sentado');
+  expect(elegido).toHaveBeenCalledWith('cat:seated_cable_rows');
+  // Buscar por variante: "cuerda" abre directamente las variantes que coinciden
+  await act(async () => r.root.findByType(TextInput).props.onChangeText('cuerda'));
+  expect(textos()).toContain('Con cuerda');
+  expect(textos()).not.toContain('Remo');
 });

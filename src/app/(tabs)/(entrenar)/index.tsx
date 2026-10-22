@@ -18,6 +18,7 @@ import { diaDe, textoHora } from '@/domain/horario';
 import { pesoEnFecha } from '@/domain/progreso';
 import { resumen, textoSerie } from '@/domain/sesion';
 import { alerta } from '@/alerta';
+import { useMarcas } from '@/hooks/use-marcas';
 
 export default function Entrenar() {
   const { data: abiertas } = useLiveQuery(db.select().from(sesion).where(isNull(sesion.fin)).limit(1));
@@ -35,6 +36,7 @@ function SesionEnCurso({ id, inicio, rutinaId, pesoCorporal }: { id: number; ini
   const { data: objetivos } = useLiveQuery(db.select().from(rutinaEjercicio).where(eq(rutinaEjercicio.rutinaId, rutinaId ?? -1)), [rutinaId]);
   const { data: rutinas } = useLiveQuery(db.select({ nombre: rutina.nombre }).from(rutina).where(eq(rutina.id, rutinaId ?? -1)), [rutinaId]);
   const [eligiendo, setEligiendo] = useState(false);
+  const marcas = useMarcas();
   const [descanso, setDescanso] = useState<{ desde: number; segundos: number } | null>(null);
 
   const terminar = () => {
@@ -63,6 +65,7 @@ function SesionEnCurso({ id, inicio, rutinaId, pesoCorporal }: { id: number; ini
         {ejercicios.map(({ ej }) => (
           <TarjetaEjercicio
             key={ej.id}
+            marca={marcas.get(ej.id)}
             ejercicio={ej}
             sesionId={id}
             objetivo={objetivos.find((o) => o.ejercicioId === ej.id)}

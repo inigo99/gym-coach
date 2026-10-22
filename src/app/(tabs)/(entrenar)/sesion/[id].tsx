@@ -14,6 +14,7 @@ import { ejercicio, rutina, rutinaEjercicio, serie, sesion, sesionEjercicio } fr
 import { anadirEjercicio, borrarSesion, descartarSiVacia } from '@/db/sesion';
 import { useLiveQuery } from '@/db/use-live-query';
 import { mayuscula } from '@/domain/calendario';
+import { useMarcas } from '@/hooks/use-marcas';
 
 /** Editar una sesión ya hecha o apuntada a mano: ejercicios y series. Cuenta en gráficas y récords como cualquier otra. */
 export default function EditarSesion() {
@@ -28,6 +29,7 @@ export default function EditarSesion() {
   const { data: objetivos } = useLiveQuery(db.select().from(rutinaEjercicio).where(eq(rutinaEjercicio.rutinaId, s?.rutinaId ?? -1)), [s?.rutinaId]);
   const { data: rutinas } = useLiveQuery(db.select({ nombre: rutina.nombre }).from(rutina).where(eq(rutina.id, s?.rutinaId ?? -1)), [s?.rutinaId]);
   const [eligiendo, setEligiendo] = useState(false);
+  const marcas = useMarcas();
 
   // Al salir de la pantalla, si se ha quedado sin series, no se guarda una sesión vacía.
   const navegacion = useNavigation();
@@ -44,7 +46,7 @@ export default function EditarSesion() {
       {!ejercicios.length && <Text style={{ color: C.tenue }}>Añade los ejercicios que hiciste y sus series. Se guarda al momento.</Text>}
 
       {ejercicios.map(({ ej }) => (
-        <TarjetaEjercicio key={ej.id} ejercicio={ej} sesionId={id} objetivo={objetivos.find((o) => o.ejercicioId === ej.id)} series={series.filter((x) => x.ejercicioId === ej.id)} onSerie={() => {}} />
+        <TarjetaEjercicio key={ej.id} marca={marcas.get(ej.id)} ejercicio={ej} sesionId={id} objetivo={objetivos.find((o) => o.ejercicioId === ej.id)} series={series.filter((x) => x.ejercicioId === ej.id)} onSerie={() => {}} />
       ))}
       <Boton texto="Añadir ejercicio" activo={!ejercicios.length} onPress={() => setEligiendo(true)} />
       {series.length > 0 && <Boton texto="Hecho" activo onPress={() => router.back()} />}

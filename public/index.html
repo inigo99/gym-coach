@@ -10,7 +10,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="gym-coach" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Barra de estado sólida: la app empieza debajo de ella (con "black-translucent" iOS deja huecos y tapa el contenido de arriba). -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <link rel="apple-touch-icon" href="%BASE%icono-180.png" />
     <title>%WEB_TITLE%</title>
     <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
@@ -30,6 +31,20 @@
         display: flex;
         height: 100%;
         flex: 1;
+      }
+      /* Alto real de la pantalla en móviles (100% se queda corto en algunas apps web instaladas de iOS). */
+      @supports (height: 100dvh) {
+        html,
+        body,
+        #root {
+          height: 100dvh;
+        }
+      }
+      /* Pantallas anchas (iPad, ordenador): columna centrada como en el móvil. */
+      #root {
+        width: 100%;
+        max-width: 720px;
+        margin: 0 auto;
       }
     </style>
   </head>

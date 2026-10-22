@@ -1,17 +1,18 @@
 import { router } from 'expo-router';
-import { FlatList, Pressable, Text, useWindowDimensions, View } from 'react-native';
+import { FlatList, Pressable, Text, View } from 'react-native';
 
 import musculos from '@/assets/data/musculos.json';
 import { FiltrosEjercicios, useFiltrosEjercicios } from '@/components/filtros-ejercicios';
 import { Ilustracion } from '@/components/ilustracion';
 import { C } from '@/constants/theme';
+import { useAnchoContenido } from '@/hooks/use-ancho';
 
 const NOMBRE_MUSCULO = Object.fromEntries(musculos.map((m) => [m.id, m.nombre]));
 
 export default function Ejercicios() {
   const f = useFiltrosEjercicios();
   const { resultados } = f;
-  const { width } = useWindowDimensions();
+  const width = useAnchoContenido();
 
   return (
     <FlatList

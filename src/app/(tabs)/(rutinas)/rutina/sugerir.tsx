@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import musculos from '@/assets/data/musculos.json';
 import { EJERCICIOS } from '@/catalogo';
@@ -14,6 +14,7 @@ import {
   type Esfuerzo, type MaterialSug, type NivelSug, type Objetivo, type Zona,
 } from '@/domain/sugerencia';
 import { useNiveles } from '@/hooks/use-niveles';
+import { useAnchoContenido } from '@/hooks/use-ancho';
 
 const NOMBRE_MUSCULO = Object.fromEntries(musculos.map((m) => [m.id, m.nombre]));
 const TIEMPOS = MINUTOS.map((m) => ({ id: String(m), nombre: `${m} min` }));
@@ -38,7 +39,7 @@ export default function SugerirRutina() {
   const elegidos = sug.huecos.map((h, k) => h.opciones[(indices[k] ?? 0) % h.opciones.length]);
   const pres = elegidos.map((e, k) => prescripcion(e, k, peticion));
   const [nombre, setNombre] = useState<string | null>(null);
-  const { width } = useWindowDimensions();
+  const width = useAnchoContenido();
 
   const cambiar = (k: number) => {
     const i = [...indices];

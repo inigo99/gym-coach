@@ -3,7 +3,7 @@ import { useLiveQuery } from '@/db/use-live-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import musculos from '@/assets/data/musculos.json';
 import { EJERCICIO, EJERCICIOS, EQUIPOS } from '@/catalogo';
@@ -20,6 +20,7 @@ import { enRango, formatoMetrica, METRICAS, RANGOS, record, serieTemporal, type 
 import { textoSerie } from '@/domain/sesion';
 import { alternativas as buscarAlternativas } from '@/domain/sugerencia';
 import { ESTANDARES, useNiveles } from '@/hooks/use-niveles';
+import { useAnchoContenido } from '@/hooks/use-ancho';
 
 const NOMBRE = Object.fromEntries(musculos.map((m) => [m.id, m.nombre]));
 const SECUNDARIO = '#7A3A2C';
@@ -40,7 +41,7 @@ export default function FichaEjercicio() {
   );
   const { data: mediciones } = useLiveQuery(db.select({ fecha: medicion.fecha, pesoKg: medicion.pesoKg }).from(medicion).orderBy(desc(medicion.fecha)));
   const niveles = useNiveles();
-  const { width } = useWindowDimensions();
+  const width = useAnchoContenido();
   const ej = ejs[0];
   const cat = EJERCICIO.get(id);
   const metricas = ej ? METRICAS[ej.registro] : [];

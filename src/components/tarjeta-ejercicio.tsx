@@ -1,5 +1,12 @@
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+
+import musculos from '@/assets/data/musculos.json';
+import { EJERCICIO } from '@/catalogo';
+import { Ilustracion } from '@/components/ilustracion';
+import type { Marca, SerieMarca } from '@/domain/marcas';
+import { useAnchoContenido } from '@/hooks/use-ancho';
 
 import { Boton, BotonIcono, Campo, num } from '@/components/ui';
 import { C } from '@/constants/theme';
@@ -38,12 +45,17 @@ const FORMA = {
   },
 } as const;
 
-export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number; objetivo?: RutinaEjercicio; series: Serie[]; onSerie: (descansoS: number) => void }) {
+const NOMBRE_MUSCULO = Object.fromEntries(musculos.map((m) => [m.id, m.nombre]));
+
+export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number; objetivo?: RutinaEjercicio; series: Serie[]; onSerie: (descansoS: number) => void; marca?: Marca<SerieMarca> }) {
   const { ejercicio: ej, sesionId, series, objetivo } = props;
   const forma = FORMA[ej.registro];
   const ultimaVez = useMemo(() => seriesUltimaVez(ej.id, sesionId), [ej.id, sesionId]);
   const [campos, setCampos] = useState<Campos>({ a: null, b: null });
   const [calentamiento, setCalentamiento] = useState(false);
+  const [tecnica, setTecnica] = useState(false);
+  const cat = EJERCICIO.get(ej.id);
+  const ancho = useAnchoContenido() - 60;
 
   // Propuesta: la misma serie de la última vez o, si no hay, la última de hoy.
   const base = ultimaVez[series.length] ?? series.at(-1) ?? ultimaVez.at(-1);
@@ -82,6 +94,31 @@ export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number
         </Text>
       )}
       {ultimaVez.length > 0 && <Text style={{ color: C.tenue, fontSize: 13 }}>Última vez: {ultimaVez.map(txt).join(', ')}</Text>}
+      {props.marca && <Text style={{ color: C.tenue, fontSize: 13 }}>Mejor serie: {textoSerie({ ...props.marca.mejor, registro: ej.registro })}</Text>}
+      {cat && (
+        <Pressable onPress={() => setTecnica((x) => !x)} accessibilityRole="button" accessibilityState={{ expanded: tecnica }} style={{ minHeight: 36, justifyContent: 'center' }}>
+          <Text style={{ color: C.acento, fontWeight: '600' }}>{tecnica ? 'Ocultar cómo se hace' : 'Cómo se hace'}</Text>
+        </Pressable>
+      )}
+      {cat && tecnica && (
+        <View style={{ gap: 8 }}>
+          <View style={{ backgroundColor: C.fondo, borderRadius: 10 }}>
+            <Ilustracion ejercicio={cat} ancho={ancho} />
+          </View>
+          <Text style={{ fontSize: 13 }}>
+            <Text style={{ color: C.acento }}>{cat.principales.map((x) => NOMBRE_MUSCULO[x]).join(', ')}</Text>
+            {cat.secundarios.length > 0 && <Text style={{ color: C.tenue }}> · {cat.secundarios.map((x) => NOMBRE_MUSCULO[x]).join(', ')}</Text>}
+          </Text>
+          {cat.tecnica.ejecucion.map((paso, i) => (
+            <Text key={i} style={{ color: C.texto, fontSize: 14, lineHeight: 20 }}>
+              {i + 1}. {paso}
+            </Text>
+          ))}
+          <Pressable onPress={() => router.push({ pathname: '/ejercicio/[id]', params: { id: ej.id } })} accessibilityRole="link" style={{ minHeight: 36, justifyContent: 'center' }}>
+            <Text style={{ color: C.acento, fontWeight: '600' }}>Ficha completa: ajustes, errores y progreso</Text>
+          </Pressable>
+        </View>
+      )}
 
       {series.map((s, i) => (
         <View key={s.id} style={{ flexDirection: 'row', alignItems: 'center', borderTopWidth: 1, borderColor: C.borde }}>
