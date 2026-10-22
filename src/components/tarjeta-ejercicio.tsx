@@ -62,7 +62,7 @@ export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number
 
   const quitar = () =>
     series.length
-      ? alerta(`¿Quitar ${ej.nombre}?`, 'Se borrarán sus series de hoy.', [
+      ? alerta(`¿Quitar ${ej.nombre}?`, 'Se borrarán sus series de esta sesión.', [
           { text: 'Cancelar', style: 'cancel' },
           { text: 'Quitar', style: 'destructive', onPress: () => quitarEjercicio(sesionId, ej.id) },
         ])

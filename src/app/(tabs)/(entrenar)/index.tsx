@@ -10,10 +10,13 @@ import { TarjetaEjercicio } from '@/components/tarjeta-ejercicio';
 import { C } from '@/constants/theme';
 import { db } from '@/db';
 import { ejercicio, horario, medicion, rutina, rutinaEjercicio, serie, sesion, sesionEjercicio } from '@/db/schema';
-import { anadirEjercicio, borrarSesion, empezarSesion, terminarSesion } from '@/db/sesion';
+import { anadirEjercicio, borrarSesion, crearSesionPasada, empezarSesion, terminarSesion } from '@/db/sesion';
+import { claveDia, mayuscula, plural } from '@/domain/calendario';
+import { Calendario } from '@/components/calendario';
+import { router } from 'expo-router';
 import { diaDe, textoHora } from '@/domain/horario';
 import { pesoEnFecha } from '@/domain/progreso';
-import { reloj, resumen, textoSerie } from '@/domain/sesion';
+import { resumen, textoSerie } from '@/domain/sesion';
 import { alerta } from '@/alerta';
 
 export default function Entrenar() {
@@ -84,17 +87,26 @@ function SesionEnCurso({ id, inicio, rutinaId, pesoCorporal }: { id: number; ini
 }
 
 function Historial({ mediciones }: { mediciones: { fecha: string; pesoKg: number }[] }) {
-  // ponytail: últimas 30 sesiones; paginar si hace falta ver más atrás (la gráfica de S4 cubre el histórico)
-  const { data: sesiones } = useLiveQuery(db.select().from(sesion).where(isNotNull(sesion.fin)).orderBy(desc(sesion.inicio)).limit(30));
-  const ids = sesiones.map((s) => s.id);
+  const { data: sesiones } = useLiveQuery(db.select().from(sesion).where(isNotNull(sesion.fin)).orderBy(desc(sesion.inicio)));
+  const { data: rutinas } = useLiveQuery(db.select().from(rutina).orderBy(asc(rutina.nombre)));
+  const { data: hoy } = useLiveQuery(db.select({ id: rutina.id, nombre: rutina.nombre, hora: horario.hora, minuto: horario.minuto }).from(horario).innerJoin(rutina, eq(rutina.id, horario.rutinaId)).where(eq(horario.dia, diaDe(new Date()))));
+  const [dia, setDia] = useState(() => claveDia(new Date()));
+  const delDia = sesiones.filter((s) => claveDia(new Date(s.inicio)) === dia).reverse();
+  const ids = delDia.map((s) => s.id);
   const { data: series } = useLiveQuery(
     db.select({ s: serie, nombre: ejercicio.nombre, registro: ejercicio.registro }).from(serie).innerJoin(ejercicio, eq(ejercicio.id, serie.ejercicioId)).where(inArray(serie.sesionId, ids)).orderBy(asc(serie.id)),
     [ids.join()],
   );
-  const { data: rutinas } = useLiveQuery(db.select().from(rutina).orderBy(asc(rutina.nombre)));
-  const { data: hoy } = useLiveQuery(db.select({ id: rutina.id, nombre: rutina.nombre, hora: horario.hora, minuto: horario.minuto }).from(horario).innerJoin(rutina, eq(rutina.id, horario.rutinaId)).where(eq(horario.dia, diaDe(new Date()))));
-  const [abierta, setAbierta] = useState<number | null>(null);
+  const entrenados = new Set(sesiones.map((s) => claveDia(new Date(s.inicio))));
+  const nombreRutina = Object.fromEntries(rutinas.map((r) => [r.id, r.nombre]));
+  const [anadiendo, setAnadiendo] = useState(false);
   const toca = hoy[0];
+  const editar = (id: number) => router.push({ pathname: '/sesion/[id]', params: { id } });
+  const apuntar = (rutinaId?: number) => {
+    setAnadiendo(false);
+    editar(crearSesionPasada(dia, rutinaId));
+  };
+  const titulo = new Date(`${dia}T12:00:00`).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 24 }}>
@@ -109,51 +121,60 @@ function Historial({ mediciones }: { mediciones: { fecha: string; pesoKg: number
         {sesiones[0] && <Boton texto="Repetir la última sesión" onPress={() => empezarSesion({ sesion: sesiones[0].id })} />}
       </View>
 
-      <Seccion titulo="Historial">
-        {!sesiones.length && <Text style={{ color: C.tenue }}>Aún no hay sesiones.</Text>}
-        {sesiones.map((ses) => {
+      <Seccion titulo="Calendario">
+        <Calendario entrenados={entrenados} seleccionado={dia} onElegir={(d) => (setDia(d), setAnadiendo(false))} />
+        <Text style={{ color: C.texto, fontSize: 17, fontWeight: '700' }}>{mayuscula(titulo)}</Text>
+        {!delDia.length && <Text style={{ color: C.tenue }}>Sin entrenamientos este día.</Text>}
+        {delDia.map((ses) => {
           const suyas = series.filter((x) => x.s.sesionId === ses.id);
           const r = resumen(suyas.map((x) => ({ ...x.s, registro: x.registro })), pesoEnFecha(mediciones, ses.inicio));
           const porEjercicio = agrupar(suyas, (x) => x.nombre);
-          const fecha = new Date(ses.inicio);
           return (
-            <View key={ses.id} style={{ backgroundColor: C.tarjeta, borderRadius: 10 }}>
-              <Pressable onPress={() => setAbierta(abierta === ses.id ? null : ses.id)} accessibilityRole="button" accessibilityState={{ expanded: abierta === ses.id }} style={{ padding: 14, gap: 4 }}>
-                <Text style={{ color: C.texto, fontSize: 16, fontWeight: '600' }}>
-                  {fecha.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' })}
+            <View key={ses.id} style={{ backgroundColor: C.tarjeta, borderRadius: 10, padding: 14, gap: 8 }}>
+              <Text style={{ color: C.tenue, fontSize: 13 }}>
+                {ses.rutinaId && nombreRutina[ses.rutinaId] ? `${nombreRutina[ses.rutinaId]} · ` : ''}
+                {plural(porEjercicio.size, 'ejercicio')} · {plural(r.series, 'serie')} · {Math.round(r.volumenKg)} kg
+              </Text>
+              {[...porEjercicio].map(([nombre, xs]) => (
+                <Text key={nombre} style={{ color: C.texto }}>
+                  <Text style={{ fontWeight: '600' }}>{nombre}: </Text>
+                  {xs.map((x) => textoSerie({ ...x.s, registro: x.registro })).join(', ')}
                 </Text>
-                <Text style={{ color: C.tenue, fontSize: 13 }}>
-                  {reloj((Date.parse(ses.fin!) - fecha.getTime()) / 1000)} · {porEjercicio.size} ejercicios · {r.series} series · {Math.round(r.volumenKg)} kg
-                </Text>
-              </Pressable>
-              {abierta === ses.id && (
-                <View style={{ paddingHorizontal: 14, paddingBottom: 6, gap: 8 }}>
-                  {[...porEjercicio].map(([nombre, xs]) => (
-                    <Text key={nombre} style={{ color: C.texto }}>
-                      <Text style={{ fontWeight: '600' }}>{nombre}: </Text>
-                      {xs.map((x) => textoSerie({ ...x.s, registro: x.registro })).join(', ')}
-                    </Text>
-                  ))}
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Pressable onPress={() => empezarSesion({ sesion: ses.id })} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center' }}>
-                      <Text style={{ color: C.acento, fontWeight: '600' }}>Repetir esta sesión</Text>
-                    </Pressable>
-                    <BotonIcono
-                      texto="🗑"
-                      etiqueta="Borrar sesión"
-                      onPress={() =>
-                        alerta('¿Borrar la sesión?', 'No se puede deshacer.', [
-                          { text: 'Cancelar', style: 'cancel' },
-                          { text: 'Borrar', style: 'destructive', onPress: () => borrarSesion(ses.id) },
-                        ])
-                      }
-                    />
-                  </View>
-                </View>
-              )}
+              ))}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                <Pressable onPress={() => editar(ses.id)} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center' }}>
+                  <Text style={{ color: C.acento, fontWeight: '600' }}>Editar</Text>
+                </Pressable>
+                <Pressable onPress={() => empezarSesion({ sesion: ses.id })} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center' }}>
+                  <Text style={{ color: C.acento, fontWeight: '600' }}>Repetir hoy</Text>
+                </Pressable>
+                <View style={{ flex: 1 }} />
+                <BotonIcono
+                  texto="🗑"
+                  etiqueta="Borrar sesión"
+                  onPress={() =>
+                    alerta('¿Borrar la sesión?', 'No se puede deshacer.', [
+                      { text: 'Cancelar', style: 'cancel' },
+                      { text: 'Borrar', style: 'destructive', onPress: () => borrarSesion(ses.id) },
+                    ])
+                  }
+                />
+              </View>
             </View>
           );
         })}
+        {anadiendo ? (
+          <View style={{ backgroundColor: C.tarjeta, borderRadius: 10, padding: 14, gap: 8 }}>
+            <Text style={{ color: C.texto, fontWeight: '600' }}>¿Qué hiciste ese día?</Text>
+            <Boton texto="En blanco: elijo los ejercicios" activo onPress={() => apuntar()} />
+            {rutinas.map((r) => (
+              <Boton key={r.id} texto={`Desde ${r.nombre}`} onPress={() => apuntar(r.id)} />
+            ))}
+            <Boton texto="Cancelar" onPress={() => setAnadiendo(false)} />
+          </View>
+        ) : (
+          <Boton texto="Apuntar un entrenamiento este día" onPress={() => setAnadiendo(true)} />
+        )}
       </Seccion>
     </ScrollView>
   );
