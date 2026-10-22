@@ -2,7 +2,7 @@
 
 App móvil (Android e iOS) para registrar el entrenamiento en el gimnasio: perfil y mediciones, series de fuerza y cardio, rutinas con horario y avisos, gráficas de progreso, fichas de técnica con mapa muscular y nivel por grupo muscular. Funciona sin conexión: los datos se guardan en el móvil (SQLite).
 
-> Estado: v1.5.0. Calendario mes a mes en Entrenar para ver, editar y apuntar a mano entrenamientos de días pasados (cuentan en gráficas y récords); app web instalable en iPhone. Catálogo de 56 ejercicios con 179 variantes (español e inglés) e ilustraciones propias; buscador con el material primero; generador de rutinas y alternativas; programas de 4–12 semanas para perder peso, ganar músculo o definir, con pauta semanal, cardio, seguimiento y alimentación orientativa (reglas fijas, sin IA).
+> Estado: v1.6.0. Máquinas Matrix añadidas (sus nombres sirven para buscar); en las sesiones, kg y reps de la última vez ya puestos. Calendario mes a mes en Entrenar para ver, editar y apuntar a mano entrenamientos de días pasados (cuentan en gráficas y récords); app web instalable en iPhone. Catálogo de 58 ejercicios con 204 variantes (español e inglés) e ilustraciones propias; buscador con el material primero; generador de rutinas y alternativas; programas de 4–12 semanas para perder peso, ganar músculo o definir, con pauta semanal, cardio, seguimiento y alimentación orientativa (reglas fijas, sin IA).
 
 ## Stack
 
@@ -59,7 +59,7 @@ Los datos solo están en el móvil. En **Perfil → Copia de seguridad** se expo
 
 ## Datos de ejercicios
 
-- **Catálogo** (`src/catalogo/datos.ts`): cada familia (por ejemplo, *Press de pecho*) agrupa sus variantes (barra, mancuernas, máquina, Smith, polea…), cada una con su forma de registrar, material, músculos y técnica. Nombres en español e inglés; los nombres de las máquinas Technogym son alias para el buscador. Los textos son propios.
+- **Catálogo** (`src/catalogo/datos.ts`): cada familia (por ejemplo, *Press de pecho*) agrupa sus variantes (barra, mancuernas, máquina, Smith, polea…), cada una con su forma de registrar, material, músculos y técnica. Nombres en español e inglés; los nombres de las máquinas Technogym y Matrix son alias para el buscador (Matrix en `src/catalogo/matrix.ts`). Los textos son propios.
 - **Ilustraciones** (`src/ilustracion/`): dibujos propios generados por código, con el mismo estilo que el mapa muscular. Muestran la posición inicial y la final, el material y los músculos que trabajan (principales en naranja, secundarios en granate). No hay imágenes de terceros.
 - **Músculos de los 36 ejercicios originales:** [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (*Unlicense*).
 - **Niveles** (`assets/data/niveles.json`): umbrales de 1RM relativo al peso corporal (o repeticiones en ejercicios con peso corporal) por sexo de [Strength Level](https://strengthlevel.com/strength-standards), consultados el 14-10-2026. Principiante ≈ más fuerte que el 5 % de sus usuarios, novato 20 %, intermedio 50 %, avanzado 80 % y élite 95 %. Es una comparación con gente que entrena y registra sus marcas, no con toda la población.

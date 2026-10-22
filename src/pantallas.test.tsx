@@ -76,3 +76,22 @@ test('Añadir ejercicio: primero el ejercicio y dentro la variante, con filtros 
   expect(textos()).toContain('Con cuerda');
   expect(textos()).not.toContain('Remo');
 });
+
+test('Sesión: kg y reps de la última vez ya puestos, sin contar el calentamiento', async () => {
+  const { TextInput } = require('react-native');
+  const { TarjetaEjercicio } = require('./components/tarjeta-ejercicio');
+  const { EJERCICIO } = require('./catalogo');
+  const { anadirSerie, empezarSesion, terminarSesion } = require('./db/sesion');
+  require('./db/semilla').sembrarCatalogo();
+  const ej = EJERCICIO.get('cat:barbell_bench_press_-_medium_grip');
+  const antes = empezarSesion();
+  anadirSerie({ sesionId: antes, ejercicioId: ej.id, calentamiento: true, pesoKg: 20, reps: 15 });
+  anadirSerie({ sesionId: antes, ejercicioId: ej.id, calentamiento: false, pesoKg: 60, reps: 8 });
+  terminarSesion(antes);
+  const ahora = empezarSesion();
+  let r: ReactTestRenderer;
+  await act(async () => {
+    r = create(<TarjetaEjercicio ejercicio={ej} sesionId={ahora} series={[]} onSerie={() => {}} />);
+  });
+  expect(r!.root.findAllByType(TextInput).map((n) => n.props.value)).toEqual(['60', '8']);
+});

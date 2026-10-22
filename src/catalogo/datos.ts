@@ -9,7 +9,7 @@ import type { Registro } from '@/domain/calculos';
 export type Categoria = 'empuje' | 'tiron' | 'piernas' | 'cadera' | 'core' | 'potencia' | 'pliometria' | 'cardio' | 'movilidad';
 export type Equipo =
   | 'barra' | 'barra_z' | 'mancuerna' | 'kettlebell' | 'disco' | 'maquina' | 'polea' | 'polea_doble'
-  | 'smith' | 'peso_corporal' | 'banco' | 'cajon' | 'barra_fija' | 'paralelas' | 'rueda' | 'cardio';
+  | 'smith' | 'peso_corporal' | 'banco' | 'cajon' | 'barra_fija' | 'paralelas' | 'rueda' | 'cardio' | 'trineo';
 
 export type Tecnica = { ajustes?: string[]; ejecucion: string[]; errores: string[] };
 
@@ -66,6 +66,7 @@ export const EQUIPOS: { id: Equipo; nombre: string }[] = [
   { id: 'paralelas', nombre: 'Paralelas' },
   { id: 'rueda', nombre: 'Rueda' },
   { id: 'cardio', nombre: 'Máquina de cardio' },
+  { id: 'trineo', nombre: 'Trineo' },
 ];
 
 const v = (id: string, nombre: string, en: string, equipo: Equipo[], registro: Registro, pose: string, extra: Partial<Variante> = {}): Variante => ({

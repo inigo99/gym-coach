@@ -233,4 +233,56 @@ export const POSES: Record<string, Par> = {
     pie({ tronco: 30, brazo: [95, 95], pierna: [165, 185], material: [{ t: 'cajon', x: 55, alto: 74, ancho: 8 }] }),
     pie({ tronco: 90, cabeza: 95, brazo: [80, 80], pierna: [170, 180], material: [{ t: 'cajon', x: 72, alto: 52, ancho: 8 }] }),
   ],
+
+  // ── Máquinas Matrix (catalogo/matrix.ts)
+  press_inclinado_maquina: ambos(pressInclinado, { t: 'banco', desde: 'cadera', hasta: 'hombro', inclinado: true }, AGARRE),
+  press_inclinado_barra: ambos(pressInclinado, { t: 'banco', desde: 'cadera', hasta: 'hombro', inclinado: true }, BARRA),
+  press_declinado_maquina: ambos([sentado({ tronco: -12, brazo: [200, 110] }), sentado({ tronco: -12, brazo: [118, 122] })], asiento(), AGARRE),
+  press_declinado_barra: ambos(
+    [
+      { tronco: -100, cabeza: -100, brazo: [0, 0], pierna: [70, 175], pie: 60 },
+      { tronco: -100, cabeza: -100, brazo: [125, 5], pierna: [70, 175], pie: 60 },
+    ],
+    { t: 'banco', desde: 'cadera', hasta: 'hombro', inclinado: true },
+    BARRA,
+  ),
+  press_hombros_barra_sentado: ambos(pressHombros, asiento(), BARRA),
+  elevacion_lateral_maquina: ambos([sentado({ brazo: [178, 90] }), sentado({ brazo: [95, 90] })], asiento(), { t: 'almohadilla', en: 'codo' }),
+  remo_alto_maquina: ambos([sentado({ tronco: 8, brazo: [30, 25] }), sentado({ tronco: 0, brazo: [200, 120] })], asiento(), AGARRE),
+  curl_scott: ambos([sentado({ tronco: 12, brazo: [135, 130] }), sentado({ tronco: 12, brazo: [135, 25] })], { t: 'asiento' }, { t: 'almohadilla', en: 'codo' }, BARRA),
+  triceps_extension_maquina: ambos([sentado({ brazo: [105, 15] }), sentado({ brazo: [105, 100] })], asiento(), { t: 'almohadilla', en: 'codo' }, AGARRE),
+  rotacion_maquina: ambos([sentado({ brazo: [70, 40] }), sentado({ tronco: -6, brazo: [120, 95] })], asiento()),
+  dominada_asistida: ambos([deRodillas({ brazo: [3, 0], elevado: 22 }), deRodillas({ tronco: 8, brazo: [160, 15], elevado: 44 })], { t: 'barra_fija' }, { t: 'almohadilla', en: 'rodilla' }),
+  fondos_asistidos: ambos([deRodillas({ tronco: 5, brazo: [178, 178], elevado: 20 }), deRodillas({ tronco: 14, brazo: [235, 175], elevado: 6 })], { t: 'paralelas' }, { t: 'almohadilla', en: 'rodilla' }),
+  gemelos_prensa: [
+    { tronco: -55, cabeza: -45, brazo: [150, 160], pierna: [65, 65], pie: 40, material: [{ t: 'banco', desde: 'cadera', hasta: 'hombro', inclinado: true }, { t: 'almohadilla', en: 'tobillo' }] },
+    { tronco: -55, cabeza: -45, brazo: [150, 160], pierna: [65, 65], pie: 345, material: [{ t: 'banco', desde: 'cadera', hasta: 'hombro', inclinado: true }, { t: 'almohadilla', en: 'tobillo' }] },
+  ],
+  gemelos_sentado_maquina: ambos([sentado({ brazo: [160, 160] }), sentado({ brazo: [160, 160], pie: 150 })], asiento(false), { t: 'almohadilla', en: 'rodilla' }),
+  aduccion_maquina: ambos([sentado({ brazo: [175, 175], pierna: [80, 175] }), sentado({ brazo: [175, 175], pierna: [92, 182] })], asiento(), { t: 'almohadilla', en: 'rodilla' }),
+  abduccion_maquina: ambos([sentado({ brazo: [175, 175], pierna: [92, 182] }), sentado({ brazo: [175, 175], pierna: [80, 175] })], asiento(), { t: 'almohadilla', en: 'rodilla' }),
+  sentadilla_hack: ambos([pie({ tronco: -10, brazo: ESPALDA }), sentadilla({ tronco: 8, brazo: ESPALDA, pierna: [85, 200] })], { t: 'banco', desde: 'cadera', hasta: 'hombro', inclinado: true }, { t: 'almohadilla', en: 'hombro' }),
+  sentadilla_cinturon: ambos([pie({ brazo: [135, 95] }), sentadilla({ tronco: 22, brazo: [135, 95] })], { t: 'almohadilla', en: 'cadera' }, AGARRE),
+  zancada_maquina: ambos(zancadaPar({ brazo: [160, 40] }), { t: 'almohadilla', en: 'hombro' }, AGARRE),
+  hip_thrust_maquina: ambos([{ tronco: -75, cabeza: -80, brazo: [90, 90], pierna: [40, 170] }, { tronco: -95, cabeza: -85, brazo: [90, 90], pierna: [80, 178] }], { t: 'cajon', x: -38, alto: 26, ancho: 14 }, { t: 'almohadilla', en: 'cadera' }),
+  hip_thrust_pie: ambos([pie({ tronco: 45, pierna: [160, 190], brazo: [150, 100] }), pie({ tronco: -4, brazo: [150, 100] })], { t: 'almohadilla', en: 'cadera' }),
+  lumbar_maquina: ambos([sentado({ tronco: 30, brazo: [150, 40] }), sentado({ tronco: -18, brazo: [150, 40] })], asiento(false), { t: 'almohadilla', en: 'hombro' }),
+  hiperextension_45: ambos(
+    [
+      { tronco: 165, cabeza: 170, brazo: [150, 30], pierna: [225, 225], pie: 135 },
+      { tronco: 45, cabeza: 50, brazo: [150, 30], pierna: [225, 225], pie: 135 },
+    ],
+    { t: 'almohadilla', en: 'cadera' },
+  ),
+  hiperextension_inversa: ambos(
+    [
+      { tronco: 90, cabeza: 92, brazo: [180, 180], pierna: [180, 180], pie: 90, elevado: 2 },
+      { tronco: 90, cabeza: 92, brazo: [180, 180], pierna: [268, 268], pie: 270, elevado: 16 },
+    ],
+    { t: 'banco', desde: 'cadera', hasta: 'hombro' },
+  ),
+  trineo: ambos(
+    [pie({ tronco: 50, brazo: [100, 95], pierna: [110, 200], pierna2: [205, 235] }), pie({ tronco: 50, brazo: [100, 95], pierna: [205, 235], pierna2: [110, 200] })],
+    { t: 'cajon', bajo: 'mano', ancho: 8 },
+  ),
 };

@@ -1,6 +1,7 @@
 import ejerciciosAntiguos from '../../assets/data/niveles.json';
 import musculos from '../../assets/data/musculos.json';
 import lista from './lista-technogym.json';
+import listaMatrix from './lista-matrix.json';
 import { buscar, EJERCICIO, EJERCICIOS, FAMILIAS, normalizar } from '.';
 import { POSES } from '@/ilustracion/poses';
 
@@ -58,4 +59,29 @@ test('buscar por músculo: primero donde es principal', () => {
   expect(r[0].familia.id).toBe('curl_biceps');
   const i = r.findIndex((x) => x.familia.id === 'remo');
   expect(i).toBeGreaterThan(r.findIndex((x) => x.familia.id === 'curl_biceps'));
+});
+
+test('cada máquina de Matrix se encuentra con el buscador por el nombre que lleva', () => {
+  const faltan = (listaMatrix as string[]).filter((n) => buscar({ texto: n }).length === 0);
+  expect(faltan).toEqual([]);
+});
+
+test('las variantes y ejercicios de Matrix tienen pose, músculos válidos y técnica', () => {
+  const nuevas = EJERCICIOS.filter((e) => e.familia.id === 'extension_lumbar' || e.familia.id === 'trineo' || /machine|hack|belt|preacher|lever|thrust|calf|barbell_(in|de)cline|seated_barbell/.test(e.id));
+  expect(nuevas.length).toBeGreaterThan(20);
+  for (const e of nuevas) {
+    expect(POSES[e.pose]).toBeDefined();
+    expect(e.tecnica.ejecucion.length).toBeGreaterThan(0);
+  }
+});
+
+test('el nombre exacto de la máquina sale primero', () => {
+  const primero = (texto: string) => buscar({ texto })[0].familia.id;
+  expect(primero('Back Extension')).toBe('extension_lumbar');
+  expect(primero('Seated Leg Curl')).toBe('curl_femoral');
+  expect(primero('Glute')).toBe('patada_gluteo');
+  expect(primero('Hip Abductor')).toBe('abduccion');
+  expect(primero('Calf Press')).toBe('gemelos');
+  expect(primero('Seated Row')).toBe('remo');
+  expect(primero('press banca')).toBe('press_pecho');
 });

@@ -1,6 +1,10 @@
-import { FAMILIAS, type Categoria, type Equipo, type Familia, type Tecnica, type Variante } from './datos';
+import { FAMILIAS as BASE, type Categoria, type Equipo, type Familia, type Tecnica, type Variante } from './datos';
+import { conMatrix } from './matrix';
 
-export { CATEGORIAS, EQUIPOS, FAMILIAS } from './datos';
+export { CATEGORIAS, EQUIPOS } from './datos';
+
+/** Catálogo completo: el base más las máquinas de Matrix (matrix.ts). */
+export const FAMILIAS: Familia[] = conMatrix(BASE);
 export type { Categoria, Equipo, Familia, Variante } from './datos';
 
 export type Ejercicio = Variante & {
@@ -32,6 +36,8 @@ export const normalizar = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '
 
 const textos = (e: Ejercicio) => normalizar([e.familia.nombre, e.familia.en, e.nombre, e.en, ...(e.alias ?? [])].join(' | '));
 const INDICE = new Map(EJERCICIOS.map((e) => [e.id, textos(e)]));
+// Cada nombre por separado, normalizado y con espacios simples: para las coincidencias exactas.
+const NOMBRES = new Map(EJERCICIOS.map((e) => [e.id, [e.familia.nombre, e.familia.en, e.nombre, e.en, e.nombreCompleto, ...(e.alias ?? [])].map((n) => normalizar(n).split(/\s+/).join(' '))]));
 
 export type Filtros = { texto?: string; categoria?: Categoria | null; musculo?: string | null; equipo?: Equipo | null };
 
@@ -50,7 +56,13 @@ export function buscar({ texto = '', categoria, musculo, equipo }: Filtros) {
     );
     if (vs.length) out.push({ familia: f, variantes: vs });
   }
-  // Con un músculo elegido, primero los ejercicios en los que es principal (el orden se mantiene dentro de cada grupo).
-  if (musculo) out.sort((a, b) => +!a.variantes.some((e) => e.principales.includes(musculo)) - +!b.variantes.some((e) => e.principales.includes(musculo)));
+  // Orden: lo que coincide exactamente con un nombre (p. ej. el de la máquina), luego lo que contiene la frase entera, luego el resto.
+  // Con un músculo elegido, además, primero donde es principal. El orden del catálogo se mantiene dentro de cada grupo.
+  const frase = palabras.join(' ');
+  const relevancia = (r: (typeof out)[number]) =>
+    (frase && r.variantes.some((e) => NOMBRES.get(e.id)!.includes(frase)) ? 4 : 0) +
+    (frase && r.variantes.some((e) => INDICE.get(e.id)!.includes(frase)) ? 2 : 0) +
+    (musculo && r.variantes.some((e) => e.principales.includes(musculo)) ? 1 : 0);
+  out.sort((a, b) => relevancia(b) - relevancia(a));
   return out;
 }

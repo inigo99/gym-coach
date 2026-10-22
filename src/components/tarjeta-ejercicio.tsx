@@ -57,8 +57,11 @@ export function TarjetaEjercicio(props: { ejercicio: Ejercicio; sesionId: number
   const cat = EJERCICIO.get(ej.id);
   const ancho = useAnchoContenido() - 60;
 
-  // Propuesta: la misma serie de la última vez o, si no hay, la última de hoy.
-  const base = ultimaVez[series.length] ?? series.at(-1) ?? ultimaVez.at(-1);
+  // Propuesta: la misma serie de la última vez (calentamientos y efectivas por separado) o, si no hay, la última de hoy.
+  const delTipo = (xs: Serie[]) => xs.filter((s) => !!s.calentamiento === calentamiento);
+  const antes = delTipo(ultimaVez);
+  const hoy = delTipo(series);
+  const base = antes[hoy.length] ?? hoy.at(-1) ?? antes.at(-1) ?? (calentamiento ? undefined : series.at(-1));
   const [propA, propB] = base ? forma.leer(base) : ['', objetivo?.repsMin ? String(objetivo.repsMin) : '']; // sin historial: reps mínimas del objetivo
   const valA = campos.a ?? propA;
   const valB = campos.b ?? propB;
