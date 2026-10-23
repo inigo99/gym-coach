@@ -25,7 +25,9 @@ test('marca: ratio con 1RM y reps equivalentes con lastre', () => {
   expect(marca('reps', [{ pesoKg: null, reps: 12, pesoCorporalKg: 80 }])).toBe(12);
   // +20 kg × 5 con 80 kg: 1RM 116,7 → 30 × (1,458 − 1) = 13,75 reps sin lastre
   expect(marca('reps', [{ pesoKg: 20, reps: 5, pesoCorporalKg: 80 }, { pesoKg: null, reps: 10, pesoCorporalKg: 80 }])).toBeCloseTo(13.75, 2);
-  expect(marca('ratio', [{ pesoKg: 50, reps: 20, pesoCorporalKg: 80 }])).toBeNull(); // > 12 reps
+  expect(marca('ratio', [{ pesoKg: 50, reps: 20, pesoCorporalKg: 80 }])).toBeCloseTo(0.875, 3); // > 12 reps cuenta como 12
+  expect(marca('reps', [{ pesoKg: -30, reps: 10, pesoCorporalKg: 80 }])).toBeLessThan(0); // asistida: por debajo de una dominada
+  expect(marca('segundos', [{ pesoKg: null, reps: null, duracionS: 60, pesoCorporalKg: 80 }])).toBe(60);
 });
 
 test('nivelPorGrupo: ponderado y solo con ejercicio principal', () => {

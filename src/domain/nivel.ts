@@ -2,7 +2,7 @@ import { e1rm } from './calculos';
 
 export const NIVELES = ['Principiante', 'Novato', 'Intermedio', 'Avanzado', 'Élite'] as const;
 
-export type Estandar = { tipo: 'ratio' | 'reps'; h: number[]; m: number[] };
+export type Estandar = { tipo: 'ratio' | 'reps' | 'segundos'; h: number[]; m: number[] };
 
 /**
  * Puntuación continua 1,0–5,0 a partir de los 5 umbrales (principiante … élite).
@@ -22,23 +22,27 @@ export function nivel(p: number) {
   return { indice: i, nombre: NIVELES[i], haciaSiguiente: i === 4 ? null : p - Math.floor(p) };
 }
 
-export type SerieNivel = { pesoKg: number | null; reps: number | null; pesoCorporalKg: number };
+export type SerieNivel = { pesoKg: number | null; reps: number | null; pesoCorporalKg: number; duracionS?: number | null };
 
 /**
  * Marca comparable con el estándar: 1RM estimado / peso corporal (ratio) o
- * repeticiones equivalentes sin lastre (reps; con lastre se convierte con Epley).
+ * repeticiones equivalentes sin lastre (reps; con lastre se convierte con Epley) o segundos aguantados.
  */
 export function marca(tipo: Estandar['tipo'], series: SerieNivel[]): number | null {
   let mejor: number | null = null;
   for (const s of series) {
+    if (tipo === 'segundos') {
+      if (s.duracionS && (mejor == null || s.duracionS > mejor)) mejor = s.duracionS;
+      continue;
+    }
     if (!s.reps || s.pesoCorporalKg <= 0) continue;
     let v: number | null;
     if (tipo === 'ratio') {
-      const rm = s.pesoKg ? e1rm(s.pesoKg, s.reps) : null;
+      const rm = s.pesoKg ? e1rm(s.pesoKg, Math.min(s.reps, 12)) : null; // más de 12 reps cuenta como 12: se queda corto, pero puntúa
       v = rm && rm / s.pesoCorporalKg;
     } else {
-      const lastre = s.pesoKg ?? 0;
-      const rm = lastre > 0 ? e1rm(s.pesoCorporalKg + lastre, s.reps) : null;
+      const lastre = s.pesoKg ?? 0; // negativo: ayuda de una máquina asistida
+      const rm = lastre !== 0 ? e1rm(Math.max(1, s.pesoCorporalKg + lastre), Math.min(s.reps, 12)) : null;
       v = rm ? 30 * (rm / s.pesoCorporalKg - 1) : s.reps;
     }
     if (v != null && (mejor == null || v > mejor)) mejor = v;
@@ -74,7 +78,7 @@ export function seriesPorSemana(series: { principales: string[]; secundarios: st
   return acc;
 }
 
-export type SerieHistorica = { ejercicioId: string; inicio: string; pesoKg: number | null; reps: number | null; calentamiento: boolean };
+export type SerieHistorica = { ejercicioId: string; inicio: string; pesoKg: number | null; reps: number | null; duracionS?: number | null; calentamiento: boolean };
 
 /**
  * Puntuación de cada ejercicio con estándar a partir de su mejor marca en las series dadas
@@ -91,7 +95,7 @@ export function puntuaciones(
     const pc = pesoEn(s.inicio);
     if (s.calentamiento || !pc || !estandares[s.ejercicioId]) continue;
     const lista = porEj.get(s.ejercicioId) ?? porEj.set(s.ejercicioId, []).get(s.ejercicioId)!;
-    lista.push({ pesoKg: s.pesoKg, reps: s.reps, pesoCorporalKg: pc });
+    lista.push({ pesoKg: s.pesoKg, reps: s.reps, duracionS: s.duracionS, pesoCorporalKg: pc });
   }
   const out = new Map<string, { marca: number; puntuacion: number }>();
   for (const [id, ss] of porEj) {

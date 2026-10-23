@@ -2,7 +2,7 @@
 
 App móvil (Android e iOS) para registrar el entrenamiento en el gimnasio: perfil y mediciones, series de fuerza y cardio, rutinas con horario y avisos, gráficas de progreso, fichas de técnica con mapa muscular y nivel por grupo muscular. Funciona sin conexión: los datos se guardan en el móvil (SQLite).
 
-> Estado: v1.6.0. Máquinas Matrix añadidas (sus nombres sirven para buscar); en las sesiones, kg y reps de la última vez ya puestos. Calendario mes a mes en Entrenar para ver, editar y apuntar a mano entrenamientos de días pasados (cuentan en gráficas y récords); app web instalable en iPhone. Catálogo de 58 ejercicios con 204 variantes (español e inglés) e ilustraciones propias; buscador con el material primero; generador de rutinas y alternativas; programas de 4–12 semanas para perder peso, ganar músculo o definir, con pauta semanal, cardio, seguimiento y alimentación orientativa (reglas fijas, sin IA).
+> Estado: v1.6.1. El mapa corporal tiene en cuenta todos los ejercicios (salvo cardio). Máquinas Matrix añadidas (sus nombres sirven para buscar); en las sesiones, kg y reps de la última vez ya puestos. Calendario mes a mes en Entrenar para ver, editar y apuntar a mano entrenamientos de días pasados (cuentan en gráficas y récords); app web instalable en iPhone. Catálogo de 58 ejercicios con 204 variantes (español e inglés) e ilustraciones propias; buscador con el material primero; generador de rutinas y alternativas; programas de 4–12 semanas para perder peso, ganar músculo o definir, con pauta semanal, cardio, seguimiento y alimentación orientativa (reglas fijas, sin IA).
 
 ## Stack
 

@@ -139,7 +139,7 @@ export default function FichaEjercicio() {
               <BarraNivel puntuacion={mio.puntuacion} />
               <Text style={{ color: C.tenue, fontSize: 13 }}>
                 Mejor marca de las últimas {niveles.semanas} semanas:{' '}
-                {estandar.tipo === 'ratio' ? `1RM estimado = ${mio.marca.toFixed(2).replace('.', ',')} × tu peso` : `≈ ${Math.floor(mio.marca)} repeticiones sin lastre`}
+                {estandar.tipo === 'segundos' ? `${Math.round(mio.marca)} s aguantados` : estandar.tipo === 'ratio' ? `1RM estimado = ${mio.marca.toFixed(2).replace('.', ',')} × tu peso` : `≈ ${Math.max(0, Math.floor(mio.marca))} repeticiones sin lastre`}
                 {ej.equipo === 'mancuerna' ? ' (peso de una mancuerna)' : ''}.
                 {nivel(mio.puntuacion).haciaSiguiente != null && ` ${Math.round(nivel(mio.puntuacion).haciaSiguiente! * 100)} % hacia el siguiente nivel.`}
               </Text>
@@ -147,7 +147,9 @@ export default function FichaEjercicio() {
           ) : (
             <Text style={{ color: C.tenue }}>Sin series de trabajo en las últimas {niveles.semanas} semanas.</Text>
           )}
-          <Text style={{ color: C.tenue, fontSize: 12 }}>Comparado con los estándares de Strength Level.</Text>
+          <Text style={{ color: C.tenue, fontSize: 12 }}>
+            Comparado con los estándares de Strength Level{estandar.ref === 'generico' ? ' (genérico, orientativo)' : estandar.ref ? ` de ${EJERCICIO.get(estandar.ref)?.nombreCompleto} (orientativo)` : ''}.
+          </Text>
         </Seccion>
       )}
 

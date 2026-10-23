@@ -78,5 +78,5 @@ export function Cuerpo({ colores, alto = 220, descripcion }: { colores: Record<s
 }
 
 /** Escala de 5 tonos del gris al acento (nivel 1–5 o volumen). */
-export const ESCALA = ['#5A3F36', '#82483A', '#AA503C', '#CF583C', '#F0603C'];
+export const ESCALA = ['#8A4636', '#A64E3A', '#C2563D', '#DC5E3F', '#F56A42'];
 export const colorEscala = (t: number) => ESCALA[Math.max(0, Math.min(4, Math.round(t * 4)))];

@@ -76,7 +76,7 @@ export function RankingCuerpo() {
 
       <Text style={{ color: C.tenue, fontSize: 12, lineHeight: 18 }}>
         {vista === 'nivel'
-          ? 'Nivel según tu mejor 1RM estimado (o repeticiones) frente a los estándares de Strength Level, por ejercicio y sexo; cada grupo pondera sus ejercicios (principal ×1, secundario ×0,5). Solo grupos con al menos un ejercicio principal registrado. La edad no ajusta el nivel.'
+          ? 'Nivel según tu mejor 1RM estimado (o repeticiones) frente a los estándares de Strength Level, por ejercicio y sexo (los ejercicios sin estándar propio usan el de una variante o un ejercicio parecido); cada grupo pondera sus ejercicios (principal ×1, secundario ×0,5). Solo grupos con al menos un ejercicio principal registrado. La edad no ajusta el nivel.'
           : 'Series de trabajo: 1 por músculo principal y 0,5 por secundario. Como referencia orientativa, muchas pautas proponen 10–20 series semanales por grupo.'}
       </Text>
     </View>
